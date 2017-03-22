@@ -1,0 +1,7 @@
+org/equinox/api/data/StatusBuilder.class
+org/equinox/api/auth/JWTValidation.class
+org/equinox/api/data/StatusBuilder$1.class
+org/equinox/api/data/SessionResponse.class
+org/equinox/api/auth/JWTProcessor.class
+org/equinox/api/data/Status.class
+org/equinox/api/data/ResponseStatus.class

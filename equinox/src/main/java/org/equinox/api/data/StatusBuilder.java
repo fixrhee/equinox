@@ -1,0 +1,68 @@
+package org.equinox.api.data;
+
+public abstract class StatusBuilder {
+
+	public static ResponseStatus getStatus(String arg) {
+
+		return StatusBuilder.getStatus(Status.valueOf(arg));
+	}
+
+	public static ResponseStatus getStatus(Status arg) {
+		switch (arg) {
+		case PROCESSED:
+			return new ResponseStatus("A00", "PROCESSED", "Transaction completed");
+		case UNAUTHORIZED_ACCESS:
+			return new ResponseStatus("A90", "UNAUTHORIZED_ACCESS",
+					"We cannot authorized you, please check your authorization");
+		case SERVICE_NOT_ALLOWED:
+			return new ResponseStatus("A16", "SERVICE_NOT_ALLOWED", "Group not allowed to access Webservices");
+		case INVALID:
+			return new ResponseStatus("A14", "INVALID", "Invalid credential");
+		case VALID:
+			return new ResponseStatus("A01", "VALID", "Credential Valid");
+		case BLOCKED:
+			return new ResponseStatus("A16", "BLOCKED", "Credential blocked");
+		case MEMBER_NOT_FOUND:
+			return new ResponseStatus("M14", "MEMBER_NOT_FOUND", "Member not found on system");
+		case DESTINATION_MEMBER_NOT_FOUND:
+			return new ResponseStatus("M15", "DESTINATION_MEMBER_NOT_FOUND", "Destination member not found on system");
+		case INVALID_ACCOUNT:
+			return new ResponseStatus("S14", "INVALID_ACCOUNT", "Invalid source account/permission not allowed");
+		case INVALID_FEE_ACCOUNT:
+			return new ResponseStatus("S16", "INVALID_FEE_ACCOUNT",
+					"Invalid fee source account/permission not allowed");
+		case INVALID_DESTINATION_ACCOUNT:
+			return new ResponseStatus("S15", "INVALID_DESTINATION_ACCOUNT",
+					"Invalid destination account/permission not allowed");
+		case INVALID_FEE_DESTINATION_ACCOUNT:
+			return new ResponseStatus("S17", "INVALID_FEE_DESTINATION_ACCOUNT",
+					"Invalid fee destination account/permission not allowed");
+		case INSUFFICIENT_BALANCE:
+			return new ResponseStatus("S22", "INSUFFICIENT_BALANCE",
+					"You dont have enough balance to process this transaction");
+		case CREDIT_LIMIT_REACHED:
+			return new ResponseStatus("S40", "CREDIT_LIMIT_REACHED", "Your monthly account limit has reached");
+		case DESTINATION_CREDIT_LIMIT_REACHED:
+			return new ResponseStatus("S41", "DESTINATION_CREDIT_LIMIT_REACHED",
+					"The destination monthly limit has reached");
+		case INVALID_TRANSFER_TYPE:
+			return new ResponseStatus("T14", "INVALID_TRANSFER_TYPE", "Invalid transfer type ID");
+		case TRANSACTION_AMOUNT_BELOW_LIMIT:
+			return new ResponseStatus("T16", "TRANSACTION_AMOUNT_BELOW_LIMIT",
+					"Transaction amount is below the threshold limit");
+		case TRANSACTION_AMOUNT_ABOVE_LIMIT:
+			return new ResponseStatus("T18", "TRANSACTION_AMOUNT_ABOVE_LIMIT",
+					"Transaction amount is above the threshold limit");
+		case DUPLICATE_TRANSACTION:
+			return new ResponseStatus("P16", "DUPLICATE_TRANSACTION", "Duplicate transaction entry");
+		case INVALID_PARAMETER:
+			return new ResponseStatus("P14", "INVALID_PARAMETER", "Invalid request parameter");
+		case SESSION_EXPIRED:
+			return new ResponseStatus("S17", "SESSION_EXPIRED", "Session token is already expired");
+		case INVALID_SIGNATURE:
+			return new ResponseStatus("S21", "INVALID_SIGNATURE", "Invalid token signature");
+		default:
+			return new ResponseStatus("E99", "UNKNOWN_ERROR", "Unknown Error");
+		}
+	}
+}

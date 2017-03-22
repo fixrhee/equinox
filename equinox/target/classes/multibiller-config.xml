@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:json="http://www.mulesoft.org/schema/mule/json"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:jms="http://www.mulesoft.org/schema/mule/jms"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:spring="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="
+http://www.mulesoft.org/schema/mule/json http://www.mulesoft.org/schema/mule/json/current/mule-json.xsd http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-current.xsd
+http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/jms http://www.mulesoft.org/schema/mule/jms/current/mule-jms.xsd">
+
+	<flow name="multiBillerFlow">
+		<http:listener config-ref="HTTP_Listener_Configuration"
+			path="BillPayment/*" allowedMethods="POST" doc:name="HTTP" />
+		<set-variable
+			value="#[org.apache.commons.lang.StringUtils.substringAfterLast(message.inboundProperties.'http.relative.path', '/')]"
+			variableName="trxType" doc:name="Variable" />
+		<message-filter onUnaccepted="invalidParameterFlow">
+			<and-filter doc:name="And">
+				<expression-filter expression="#[payload['token'] != null]" />
+				<expression-filter expression="#[payload['secret'] != null]" />
+			</and-filter>
+		</message-filter>
+		<flow-ref name="validateFlow" />
+		<expression-component doc:name="Expression">
+			<![CDATA[
+			responseMap = new org.equinox.api.data.SessionResponse(payload, 'PROCESSED');
+			payload = responseMap;]]>
+		</expression-component>
+		<json:object-to-json-transformer
+			doc:name="Object to JSON" mapper-ref="NonNullMapper" />
+		<exception-strategy ref="SessionException" />
+	</flow>
+</mule>
