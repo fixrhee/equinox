@@ -1,0 +1,328 @@
+<metadata__cache__entry>
+  <version>5.2.0.0</version>
+  <connectorName>Access_Web_Service_Consumer</connectorName>
+  <metadataIo class="tree-map">
+    <entry>
+      <string>validateCredential</string>
+      <map>
+        <entry>
+          <string>__default__</string>
+          <org.mule.tooling.metadata.cache.DefaultMetadataCacheEntry>
+            <input class="org.mule.common.metadata.DefaultMetaData">
+              <payload class="org.mule.tooling.metadata.api.TypeRefMetaDataModel">
+                <connectorName>Access_Web_Service_Consumer</connectorName>
+                <typeId>headerAuth</typeId>
+                <category>DEFAULT</category>
+              </payload>
+              <properties>
+                <entry>
+                  <org.mule.common.metadata.MetaDataPropertyScope>SESSION</org.mule.common.metadata.MetaDataPropertyScope>
+                  <org.mule.common.metadata.MetaDataProperties>
+                    <fields/>
+                  </org.mule.common.metadata.MetaDataProperties>
+                </entry>
+                <entry>
+                  <org.mule.common.metadata.MetaDataPropertyScope>OUTBOUND</org.mule.common.metadata.MetaDataPropertyScope>
+                  <org.mule.common.metadata.MetaDataProperties>
+                    <fields>
+                      <org.mule.common.metadata.DefaultMetaDataField>
+                        <name>soap.headerAuth</name>
+                        <model class="org.mule.common.metadata.DefaultXmlMetaDataModel">
+                          <dataType>XML</dataType>
+                          <metaDataModelPropertiesManager>
+                            <properties>
+                              <org.mule.common.metadata.property.xml.SchemaTypeMetaDataProperty>
+                                <typeQName>
+                                  <namespaceURI>http://services.bellatrix.org/</namespaceURI>
+                                  <localPart>header</localPart>
+                                  <prefix></prefix>
+                                </typeQName>
+                              </org.mule.common.metadata.property.xml.SchemaTypeMetaDataProperty>
+                            </properties>
+                          </metaDataModelPropertiesManager>
+                          <fields>
+                            <org.mule.common.metadata.DefaultMetaDataField>
+                              <name>token</name>
+                              <model class="org.mule.common.metadata.DefaultSimpleMetaDataModel">
+                                <dataType>STRING</dataType>
+                                <metaDataModelPropertiesManager>
+                                  <properties>
+                                    <org.mule.common.metadata.property.xml.SchemaTypeMetaDataProperty>
+                                      <typeQName>
+                                        <namespaceURI>http://www.w3.org/2001/XMLSchema</namespaceURI>
+                                        <localPart>string</localPart>
+                                        <prefix></prefix>
+                                      </typeQName>
+                                    </org.mule.common.metadata.property.xml.SchemaTypeMetaDataProperty>
+                                  </properties>
+                                </metaDataModelPropertiesManager>
+                              </model>
+                              <accessType>READ_WRITE</accessType>
+                              <metaDataFieldPropertyManager>
+                                <properties>
+                                  <org.mule.common.metadata.property.QNameMetaDataProperty>
+                                    <name>
+                                      <namespaceURI></namespaceURI>
+                                      <localPart>token</localPart>
+                                      <prefix></prefix>
+                                    </name>
+                                  </org.mule.common.metadata.property.QNameMetaDataProperty>
+                                </properties>
+                              </metaDataFieldPropertyManager>
+                            </org.mule.common.metadata.DefaultMetaDataField>
+                          </fields>
+                          <rootElement>
+                            <namespaceURI>http://services.bellatrix.org/</namespaceURI>
+                            <localPart>headerAuth</localPart>
+                            <prefix>ns0</prefix>
+                          </rootElement>
+                          <schemas class="org.mule.common.metadata.StringBasedSchemaProvider">
+                            <schemas>
+                              <string>&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;&lt;xs:schema xmlns:xs=&quot;http://www.w3.org/2001/XMLSchema&quot; xmlns:ns1=&quot;http://schemas.xmlsoap.org/soap/http&quot; xmlns:soap=&quot;http://schemas.xmlsoap.org/wsdl/soap/&quot; xmlns:tns=&quot;http://services.bellatrix.org/&quot; xmlns:wsdl=&quot;http://schemas.xmlsoap.org/wsdl/&quot; xmlns:xsd=&quot;http://www.w3.org/2001/XMLSchema&quot; attributeFormDefault=&quot;unqualified&quot; elementFormDefault=&quot;unqualified&quot; targetNamespace=&quot;http://services.bellatrix.org/&quot;&gt;
+  &lt;xs:complexType name=&quot;header&quot;&gt;
+    &lt;xs:sequence&gt;
+      &lt;xs:element minOccurs=&quot;0&quot; name=&quot;token&quot; type=&quot;xs:string&quot;/&gt;
+    &lt;/xs:sequence&gt;
+  &lt;/xs:complexType&gt;
+  &lt;xs:complexType name=&quot;credentialStatusRequest&quot;&gt;
+    &lt;xs:sequence&gt;
+      &lt;xs:element minOccurs=&quot;0&quot; name=&quot;username&quot; type=&quot;xs:string&quot;/&gt;
+    &lt;/xs:sequence&gt;
+  &lt;/xs:complexType&gt;
+  &lt;xs:complexType name=&quot;credentialStatusResponse&quot;&gt;
+    &lt;xs:sequence&gt;
+      &lt;xs:element minOccurs=&quot;0&quot; name=&quot;accessStatus&quot; type=&quot;tns:accessStatus&quot;/&gt;
+      &lt;xs:element minOccurs=&quot;0&quot; name=&quot;status&quot; type=&quot;tns:responseStatus&quot;/&gt;
+    &lt;/xs:sequence&gt;
+  &lt;/xs:complexType&gt;
+  &lt;xs:complexType name=&quot;accessStatus&quot;&gt;
+    &lt;xs:sequence&gt;
+      &lt;xs:element minOccurs=&quot;0&quot; name=&quot;accessTypeID&quot; type=&quot;xs:int&quot;/&gt;
+      &lt;xs:element name=&quot;blocked&quot; type=&quot;xs:boolean&quot;/&gt;
+      &lt;xs:element name=&quot;expired&quot; type=&quot;xs:boolean&quot;/&gt;
+      &lt;xs:element minOccurs=&quot;0&quot; name=&quot;expiredDate&quot; type=&quot;xs:dateTime&quot;/&gt;
+    &lt;/xs:sequence&gt;
+  &lt;/xs:complexType&gt;
+  &lt;xs:complexType name=&quot;responseStatus&quot;&gt;
+    &lt;xs:sequence&gt;
+      &lt;xs:element minOccurs=&quot;0&quot; name=&quot;description&quot; type=&quot;xs:string&quot;/&gt;
+      &lt;xs:element minOccurs=&quot;0&quot; name=&quot;message&quot; type=&quot;xs:string&quot;/&gt;
+      &lt;xs:element minOccurs=&quot;0&quot; name=&quot;responseCode&quot; type=&quot;xs:string&quot;/&gt;
+    &lt;/xs:sequence&gt;
+  &lt;/xs:complexType&gt;
+  &lt;xs:complexType name=&quot;changeCredentialRequest&quot;&gt;
+    &lt;xs:sequence&gt;
+      &lt;xs:element minOccurs=&quot;0&quot; name=&quot;accessTypeID&quot; type=&quot;xs:int&quot;/&gt;
+      &lt;xs:element minOccurs=&quot;0&quot; name=&quot;newCredential&quot; type=&quot;xs:string&quot;/&gt;
+      &lt;xs:element minOccurs=&quot;0&quot; name=&quot;oldCredential&quot; type=&quot;xs:string&quot;/&gt;
+      &lt;xs:element minOccurs=&quot;0&quot; name=&quot;username&quot; type=&quot;xs:string&quot;/&gt;
+    &lt;/xs:sequence&gt;
+  &lt;/xs:complexType&gt;
+  &lt;xs:complexType name=&quot;resetCredentialRequest&quot;&gt;
+    &lt;xs:sequence&gt;
+      &lt;xs:element minOccurs=&quot;0&quot; name=&quot;accessTypeID&quot; type=&quot;xs:int&quot;/&gt;
+      &lt;xs:element minOccurs=&quot;0&quot; name=&quot;email&quot; type=&quot;xs:string&quot;/&gt;
+      &lt;xs:element minOccurs=&quot;0&quot; name=&quot;username&quot; type=&quot;xs:string&quot;/&gt;
+    &lt;/xs:sequence&gt;
+  &lt;/xs:complexType&gt;
+  &lt;xs:complexType name=&quot;resetCredentialResponse&quot;&gt;
+    &lt;xs:sequence&gt;
+      &lt;xs:element minOccurs=&quot;0&quot; name=&quot;status&quot; type=&quot;tns:responseStatus&quot;/&gt;
+    &lt;/xs:sequence&gt;
+  &lt;/xs:complexType&gt;
+  &lt;xs:complexType name=&quot;validateCredentialRequest&quot;&gt;
+    &lt;xs:sequence&gt;
+      &lt;xs:element minOccurs=&quot;0&quot; name=&quot;accessTypeID&quot; type=&quot;xs:int&quot;/&gt;
+      &lt;xs:element minOccurs=&quot;0&quot; name=&quot;credential&quot; type=&quot;xs:string&quot;/&gt;
+      &lt;xs:element minOccurs=&quot;0&quot; name=&quot;username&quot; type=&quot;xs:string&quot;/&gt;
+    &lt;/xs:sequence&gt;
+  &lt;/xs:complexType&gt;
+  &lt;xs:complexType name=&quot;validateCredentialResponse&quot;&gt;
+    &lt;xs:sequence&gt;
+      &lt;xs:element minOccurs=&quot;0&quot; name=&quot;status&quot; type=&quot;tns:responseStatus&quot;/&gt;
+    &lt;/xs:sequence&gt;
+  &lt;/xs:complexType&gt;
+  &lt;xs:complexType name=&quot;unblockCredentialRequest&quot;&gt;
+    &lt;xs:sequence&gt;
+      &lt;xs:element minOccurs=&quot;0&quot; name=&quot;accessTypeID&quot; type=&quot;xs:int&quot;/&gt;
+      &lt;xs:element minOccurs=&quot;0&quot; name=&quot;username&quot; type=&quot;xs:string&quot;/&gt;
+    &lt;/xs:sequence&gt;
+  &lt;/xs:complexType&gt;
+  &lt;xs:complexType name=&quot;createCredentialRequest&quot;&gt;
+    &lt;xs:sequence&gt;
+      &lt;xs:element minOccurs=&quot;0&quot; name=&quot;accessTypeID&quot; type=&quot;xs:int&quot;/&gt;
+      &lt;xs:element name=&quot;blocked&quot; type=&quot;xs:boolean&quot;/&gt;
+      &lt;xs:element minOccurs=&quot;0&quot; name=&quot;credential&quot; type=&quot;xs:string&quot;/&gt;
+      &lt;xs:element name=&quot;expired&quot; type=&quot;xs:boolean&quot;/&gt;
+      &lt;xs:element minOccurs=&quot;0&quot; name=&quot;expiredDate&quot; type=&quot;xs:dateTime&quot;/&gt;
+      &lt;xs:element minOccurs=&quot;0&quot; name=&quot;memberID&quot; type=&quot;xs:int&quot;/&gt;
+    &lt;/xs:sequence&gt;
+  &lt;/xs:complexType&gt;
+  &lt;xs:element name=&quot;headerAuth&quot; nillable=&quot;true&quot; type=&quot;tns:header&quot;/&gt;
+  &lt;xs:element name=&quot;Exception&quot; type=&quot;tns:Exception&quot;/&gt;
+  &lt;xs:complexType name=&quot;Exception&quot;&gt;
+    &lt;xs:sequence&gt;
+      &lt;xs:element minOccurs=&quot;0&quot; name=&quot;message&quot; type=&quot;xs:string&quot;/&gt;
+    &lt;/xs:sequence&gt;
+  &lt;/xs:complexType&gt;
+  &lt;xs:element name=&quot;credentialStatus&quot; nillable=&quot;true&quot; type=&quot;tns:credentialStatusRequest&quot;/&gt;
+  &lt;xs:element name=&quot;credentialStatusResponse&quot; nillable=&quot;true&quot; type=&quot;tns:credentialStatusResponse&quot;/&gt;
+  &lt;xs:element name=&quot;changeCredential&quot; nillable=&quot;true&quot; type=&quot;tns:changeCredentialRequest&quot;/&gt;
+  &lt;xs:element name=&quot;resetCredential&quot; nillable=&quot;true&quot; type=&quot;tns:resetCredentialRequest&quot;/&gt;
+  &lt;xs:element name=&quot;resetCredentialResponse&quot; nillable=&quot;true&quot; type=&quot;tns:resetCredentialResponse&quot;/&gt;
+  &lt;xs:element name=&quot;validateCredential&quot; nillable=&quot;true&quot; type=&quot;tns:validateCredentialRequest&quot;/&gt;
+  &lt;xs:element name=&quot;validateCredentialResponse&quot; nillable=&quot;true&quot; type=&quot;tns:validateCredentialResponse&quot;/&gt;
+  &lt;xs:element name=&quot;unblockCredential&quot; nillable=&quot;true&quot; type=&quot;tns:unblockCredentialRequest&quot;/&gt;
+  &lt;xs:element name=&quot;createCredential&quot; nillable=&quot;true&quot; type=&quot;tns:createCredentialRequest&quot;/&gt;
+&lt;/xs:schema&gt;</string>
+                            </schemas>
+                            <encoding>UTF-8</encoding>
+                          </schemas>
+                          <namespaceManager>
+                            <namespacePrefix>
+                              <entry>
+                                <string>http://services.bellatrix.org/</string>
+                                <string>ns0</string>
+                              </entry>
+                            </namespacePrefix>
+                          </namespaceManager>
+                        </model>
+                        <accessType>READ_WRITE</accessType>
+                        <metaDataFieldPropertyManager>
+                          <properties/>
+                        </metaDataFieldPropertyManager>
+                      </org.mule.common.metadata.DefaultMetaDataField>
+                    </fields>
+                  </org.mule.common.metadata.MetaDataProperties>
+                </entry>
+                <entry>
+                  <org.mule.common.metadata.MetaDataPropertyScope>RECORD</org.mule.common.metadata.MetaDataPropertyScope>
+                  <org.mule.common.metadata.MetaDataProperties>
+                    <fields/>
+                  </org.mule.common.metadata.MetaDataProperties>
+                </entry>
+                <entry>
+                  <org.mule.common.metadata.MetaDataPropertyScope>FLOW</org.mule.common.metadata.MetaDataPropertyScope>
+                  <org.mule.common.metadata.MetaDataProperties>
+                    <fields/>
+                  </org.mule.common.metadata.MetaDataProperties>
+                </entry>
+                <entry>
+                  <org.mule.common.metadata.MetaDataPropertyScope>INBOUND</org.mule.common.metadata.MetaDataPropertyScope>
+                  <org.mule.common.metadata.MetaDataProperties>
+                    <fields/>
+                  </org.mule.common.metadata.MetaDataProperties>
+                </entry>
+              </properties>
+            </input>
+            <output class="org.mule.common.metadata.DefaultMetaData">
+              <payload class="org.mule.tooling.metadata.api.TypeRefMetaDataModel">
+                <connectorName>Access_Web_Service_Consumer</connectorName>
+                <typeId>validateCredentialResponse</typeId>
+                <category>DEFAULT</category>
+              </payload>
+              <properties>
+                <entry>
+                  <org.mule.common.metadata.MetaDataPropertyScope>SESSION</org.mule.common.metadata.MetaDataPropertyScope>
+                  <org.mule.common.metadata.MetaDataProperties>
+                    <fields/>
+                  </org.mule.common.metadata.MetaDataProperties>
+                </entry>
+                <entry>
+                  <org.mule.common.metadata.MetaDataPropertyScope>OUTBOUND</org.mule.common.metadata.MetaDataPropertyScope>
+                  <org.mule.common.metadata.MetaDataProperties>
+                    <fields/>
+                  </org.mule.common.metadata.MetaDataProperties>
+                </entry>
+                <entry>
+                  <org.mule.common.metadata.MetaDataPropertyScope>RECORD</org.mule.common.metadata.MetaDataPropertyScope>
+                  <org.mule.common.metadata.MetaDataProperties>
+                    <fields/>
+                  </org.mule.common.metadata.MetaDataProperties>
+                </entry>
+                <entry>
+                  <org.mule.common.metadata.MetaDataPropertyScope>FLOW</org.mule.common.metadata.MetaDataPropertyScope>
+                  <org.mule.common.metadata.MetaDataProperties>
+                    <fields/>
+                  </org.mule.common.metadata.MetaDataProperties>
+                </entry>
+                <entry>
+                  <org.mule.common.metadata.MetaDataPropertyScope>INBOUND</org.mule.common.metadata.MetaDataPropertyScope>
+                  <org.mule.common.metadata.MetaDataProperties>
+                    <fields>
+                      <org.mule.common.metadata.DefaultMetaDataField>
+                        <name>soap.headerAuth</name>
+                        <model class="org.mule.common.metadata.DefaultXmlMetaDataModel">
+                          <dataType>XML</dataType>
+                          <metaDataModelPropertiesManager>
+                            <properties>
+                              <org.mule.common.metadata.property.xml.SchemaTypeMetaDataProperty>
+                                <typeQName>
+                                  <namespaceURI>http://services.bellatrix.org/</namespaceURI>
+                                  <localPart>header</localPart>
+                                  <prefix></prefix>
+                                </typeQName>
+                              </org.mule.common.metadata.property.xml.SchemaTypeMetaDataProperty>
+                            </properties>
+                          </metaDataModelPropertiesManager>
+                          <fields>
+                            <org.mule.common.metadata.DefaultMetaDataField>
+                              <name>token</name>
+                              <model class="org.mule.common.metadata.DefaultSimpleMetaDataModel">
+                                <dataType>STRING</dataType>
+                                <metaDataModelPropertiesManager>
+                                  <properties>
+                                    <org.mule.common.metadata.property.xml.SchemaTypeMetaDataProperty>
+                                      <typeQName reference="../../../../../../../../../../../../../../input/properties/entry[2]/org.mule.common.metadata.MetaDataProperties/fields/org.mule.common.metadata.DefaultMetaDataField/model/fields/org.mule.common.metadata.DefaultMetaDataField/model/metaDataModelPropertiesManager/properties/org.mule.common.metadata.property.xml.SchemaTypeMetaDataProperty/typeQName"/>
+                                    </org.mule.common.metadata.property.xml.SchemaTypeMetaDataProperty>
+                                  </properties>
+                                </metaDataModelPropertiesManager>
+                              </model>
+                              <accessType>READ_WRITE</accessType>
+                              <metaDataFieldPropertyManager>
+                                <properties>
+                                  <org.mule.common.metadata.property.QNameMetaDataProperty>
+                                    <name>
+                                      <namespaceURI></namespaceURI>
+                                      <localPart>token</localPart>
+                                      <prefix></prefix>
+                                    </name>
+                                  </org.mule.common.metadata.property.QNameMetaDataProperty>
+                                </properties>
+                              </metaDataFieldPropertyManager>
+                            </org.mule.common.metadata.DefaultMetaDataField>
+                          </fields>
+                          <rootElement>
+                            <namespaceURI>http://services.bellatrix.org/</namespaceURI>
+                            <localPart>headerAuth</localPart>
+                            <prefix>ns0</prefix>
+                          </rootElement>
+                          <schemas class="org.mule.common.metadata.StringBasedSchemaProvider">
+                            <schemas reference="../../../../../../../../../input/properties/entry[2]/org.mule.common.metadata.MetaDataProperties/fields/org.mule.common.metadata.DefaultMetaDataField/model/schemas/schemas"/>
+                            <encoding reference="../../../../../../../../../input/properties/entry[2]/org.mule.common.metadata.MetaDataProperties/fields/org.mule.common.metadata.DefaultMetaDataField/model/schemas/encoding"/>
+                          </schemas>
+                          <namespaceManager>
+                            <namespacePrefix>
+                              <entry>
+                                <string>http://services.bellatrix.org/</string>
+                                <string>ns0</string>
+                              </entry>
+                            </namespacePrefix>
+                          </namespaceManager>
+                        </model>
+                        <accessType>READ_WRITE</accessType>
+                        <metaDataFieldPropertyManager>
+                          <properties/>
+                        </metaDataFieldPropertyManager>
+                      </org.mule.common.metadata.DefaultMetaDataField>
+                    </fields>
+                  </org.mule.common.metadata.MetaDataProperties>
+                </entry>
+              </properties>
+            </output>
+          </org.mule.tooling.metadata.cache.DefaultMetadataCacheEntry>
+        </entry>
+      </map>
+    </entry>
+  </metadataIo>
+</metadata__cache__entry>

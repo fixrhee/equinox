@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<mule xmlns:json="http://www.mulesoft.org/schema/mule/json"
+<mule xmlns:ws="http://www.mulesoft.org/schema/mule/ws" xmlns:json="http://www.mulesoft.org/schema/mule/json"
 	xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:jms="http://www.mulesoft.org/schema/mule/jms"
 	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
 	xmlns:spring="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -8,73 +8,55 @@
 http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
 http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
 http://www.mulesoft.org/schema/mule/jms http://www.mulesoft.org/schema/mule/jms/current/mule-jms.xsd
-http://www.mulesoft.org/schema/mule/json http://www.mulesoft.org/schema/mule/json/current/mule-json.xsd">
+http://www.mulesoft.org/schema/mule/json http://www.mulesoft.org/schema/mule/json/current/mule-json.xsd
+http://www.mulesoft.org/schema/mule/ws http://www.mulesoft.org/schema/mule/ws/current/mule-ws.xsd">
 
-	<choice-exception-strategy name="SessionException"
-		doc:name="Choice Exception Strategy">
-		<catch-exception-strategy
-			when="#[exception.causedBy(com.auth0.jwt.exceptions.InvalidClaimException)]"
-			doc:name="Catch Exception Strategy">
-			<expression-component doc:name="Expression">
-					<![CDATA[
-					responseMap = new org.equinox.api.data.SessionResponse('SESSION_EXPIRED');
-					payload = responseMap;]]>
-			</expression-component>
-			<json:object-to-json-transformer
-				doc:name="Object to JSON" mapper-ref="NonNullMapper" />
-		</catch-exception-strategy>
-		<catch-exception-strategy
-			when="#[exception.causedBy(com.auth0.jwt.exceptions.SignatureVerificationException)]"
-			doc:name="Catch Exception Strategy">
-			<expression-component doc:name="Expression">
-					<![CDATA[
-					responseMap = new org.equinox.api.data.SessionResponse('INVALID_SIGNATURE');
-					payload = responseMap;]]>
-			</expression-component>
-			<json:object-to-json-transformer
-				doc:name="Object to JSON" mapper-ref="NonNullMapper" />
-		</catch-exception-strategy>
-	</choice-exception-strategy>
-
-	<flow name="loginFlow">
-		<http:listener config-ref="HTTP_Listener_Configuration"
-			path="Session/Login" allowedMethods="GET" doc:name="HTTP" />
-		<set-payload value="#[message.inboundProperties.'http.query.params']"
-			doc:name="Set Payload" />
-		<message-filter onUnaccepted="invalidParameterFlow">
-			<and-filter doc:name="And">
-				<expression-filter expression="#[payload['username'] != null]" />
-				<expression-filter expression="#[payload['secret'] != null]" />
-			</and-filter>
-		</message-filter>
-
-		<!-- CHECK CREDENTIALS TO WALLET SYSTEM -->
-		<pooled-component>
-			<spring-object bean="JWTProcessor" />
-		</pooled-component>
+	<flow name="loginConfigFlow">
 		<expression-component doc:name="Expression">
-			<![CDATA[
-			responseMap = new org.equinox.api.data.SessionResponse(payload, 'PROCESSED');
-			payload = responseMap;]]>
+		<![CDATA[
+			msg='<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:ser="http://services.bellatrix.org/">
+   			<soapenv:Header>
+ 		     <ser:headerAuth>
+ 	        <token>' + flowVars['token'] + '</token>
+			   </ser:headerAuth>
+			   </soapenv:Header>
+			   <soapenv:Body>
+			      <ser:validateCredential>
+			         <accessTypeID>1</accessTypeID>
+			         <credential>' + originalPayload['credential'] + '</credential>
+			         <username>' + originalPayload['username'] + '</username>
+			      </ser:validateCredential>
+			   </soapenv:Body>
+			</soapenv:Envelope>';
+			payload = msg;]]>
 		</expression-component>
+		<http:request config-ref="HTTP_Request_Configuration"
+			path="access" method="POST" doc:name="HTTP" />
+		<byte-array-to-string-transformer
+			doc:name="Byte Array to String" />
+		<set-variable value="#[xpath3('//status/message')]"
+			variableName="status" doc:name="Variable" />
+		<choice>
+			<when expression="#[flowVars['status'] == 'VALID']">
+				<set-payload value="#[flowVars['originalPayload']]" />
+				<pooled-component>
+					<spring-object bean="JWTProcessor" />
+				</pooled-component>
+				<expression-component doc:name="Expression"> 
+					<![CDATA[ responseMap = new 
+					org.equinox.api.data.SessionResponse(payload, 'PROCESSED'); payload = responseMap;]]>
+				</expression-component>
+			</when>
+			<otherwise>
+				<expression-component doc:name="Expression"> 
+					<![CDATA[ responseMap = new 
+					org.equinox.api.data.SessionResponse(flowVars['status']); payload = responseMap;]]>
+				</expression-component>
+			</otherwise>
+		</choice>
 		<json:object-to-json-transformer
-			doc:name="Object to JSON" mapper-ref="NonNullMapper" />
+			doc:name="Object 
+			to JSON" mapper-ref="NonNullMapper" />
 	</flow>
-
-	<flow name="invalidParameterFlow">
-		<expression-component doc:name="Expression">
-			<![CDATA[
-			responseMap = new org.equinox.api.data.SessionResponse('INVALID_PARAMETER');
-			payload = responseMap;]]>
-		</expression-component>
-		<json:object-to-json-transformer
-			doc:name="Object to JSON" mapper-ref="NonNullMapper" />
-	</flow>
-
-	<sub-flow name="validateFlow">
-		<pooled-component>
-			<spring-object bean="JWTValidation" />
-		</pooled-component>
-	</sub-flow>
 
 </mule>

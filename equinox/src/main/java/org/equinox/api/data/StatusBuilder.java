@@ -58,9 +58,11 @@ public abstract class StatusBuilder {
 		case INVALID_PARAMETER:
 			return new ResponseStatus("P14", "INVALID_PARAMETER", "Invalid request parameter");
 		case SESSION_EXPIRED:
-			return new ResponseStatus("S17", "SESSION_EXPIRED", "Session token is already expired");
+			return new ResponseStatus("L17", "SESSION_EXPIRED", "Session token is already expired");
 		case INVALID_SIGNATURE:
-			return new ResponseStatus("S21", "INVALID_SIGNATURE", "Invalid token signature");
+			return new ResponseStatus("L21", "INVALID_SIGNATURE", "Invalid token signature");
+		case INVALID_URL:
+			return new ResponseStatus("B21", "INVALID_URL", "Invalid URL");
 		default:
 			return new ResponseStatus("E99", "UNKNOWN_ERROR", "Unknown Error");
 		}

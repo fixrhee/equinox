@@ -17,6 +17,7 @@ http://www.springframework.org/schema/tx http://www.springframework.org/schema/t
 		<property name="subject" value="${api.jwt.subject.value}" />
 	</bean>
 
+	<bean id="JWTDecoder" class="org.equinox.api.auth.JWTDecoder" />
 	<bean id="JWTValidation" class="org.equinox.api.auth.JWTValidation">
 		<property name="issuer" value="${api.jwt.issuer.value}" />
 	</bean>

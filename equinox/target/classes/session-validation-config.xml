@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ws="http://www.mulesoft.org/schema/mule/ws" xmlns:json="http://www.mulesoft.org/schema/mule/json"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:jms="http://www.mulesoft.org/schema/mule/jms"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:spring="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-current.xsd
+http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/jms http://www.mulesoft.org/schema/mule/jms/current/mule-jms.xsd
+http://www.mulesoft.org/schema/mule/json http://www.mulesoft.org/schema/mule/json/current/mule-json.xsd
+http://www.mulesoft.org/schema/mule/ws http://www.mulesoft.org/schema/mule/ws/current/mule-ws.xsd">
+
+	<flow name="loginValidationFlow">
+		<set-variable variableName="originalPayload" value="#[payload]"
+			doc:name="Variable" />
+		<message-filter onUnaccepted="invalidParameterFlow"
+			doc:name="Message">
+			<and-filter doc:name="And">
+				<expression-filter expression="#[payload['username'] != null]" />
+				<expression-filter expression="#[payload['credential'] != null]" />
+			</and-filter>
+		</message-filter>
+		<set-variable variableName="token" value="${api.ws.header.token}"
+			doc:name="Variable" />
+		<flow-ref name="loginValidation" />
+		<logger level="INFO" message="#[originalPayload]" />
+		<choice doc:name="Choice">
+			<when expression="payload == 'ALLOWED'">
+				<logger level="INFO" message="[LoginVALIDATION Passed]"
+					doc:name="Logger" />
+				<set-payload value="#[originalPayload]" />
+				<flow-ref name="loginConfigFlow" />
+			</when>
+			<otherwise>
+				<logger level="INFO"
+					message="[ACCESS Login Validation for #[originalPayload['username']] : User Not Found]"
+					doc:name="Logger" />
+				<expression-component doc:name="Expression"> 
+					<![CDATA[ responseMap = new 
+					org.equinox.api.data.SessionResponse(flowVars['status']); payload = responseMap;]]>
+				</expression-component>
+				<json:object-to-json-transformer
+					doc:name="Object to JSON" mapper-ref="NonNullMapper" />
+			</otherwise>
+		</choice>
+	</flow>
+
+</mule>

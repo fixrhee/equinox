@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:spring="http://www.springframework.org/schema/beans" version="CE-3.7.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-current.xsd
+http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd">
+
+	<sub-flow name="loginValidation">
+		<logger level="INFO" message="[Processing LOGIN Validation]" />
+		<expression-component doc:name="Expression">
+		<![CDATA[
+			msg='<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:ser="http://services.bellatrix.org/">
+			   <soapenv:Header>
+			      <ser:headerAuth>
+			         <token>' + flowVars['token'] + '</token>
+			      </ser:headerAuth>
+			   </soapenv:Header>
+			   <soapenv:Body>
+			      <ser:loadMembersByUsername>
+			         <username>' + originalPayload['username'] + '</username>
+			      </ser:loadMembersByUsername>
+			   </soapenv:Body>
+			</soapenv:Envelope>';
+			payload = msg;]]>
+		</expression-component>
+		<http:request config-ref="HTTP_Request_Configuration"
+			path="members" method="POST" doc:name="HTTP" />
+		<byte-array-to-string-transformer
+			doc:name="Byte Array to String" />
+		<set-variable value="#[xpath3('//status/message')]"
+			variableName="status" doc:name="Variable" />
+		<choice>
+			<when expression="#[flowVars['status'] == 'PROCESSED']">
+				<foreach collection="#[xpath3('//customFields', payload, 'NODESET')]"
+					doc:name="For Each">
+					<set-variable variableName="tempHeader"
+						value="#[xpath3('//customFields' + [counter] + '/internalName')]"
+						doc:name="Variable" />
+					<set-variable variableName="tempValue"
+						value="#[xpath3('//customFields' + [counter] + '/value')]"
+						doc:name="Variable" />
+					<expression-transformer
+						expression="#[originalPayload[tempHeader]=tempValue;originalPayload]"
+						doc:name="Expression" />
+				</foreach>
+				<set-payload value="ALLOWED" />
+			</when>
+			<otherwise>
+				<set-payload value="#[flowVars['status']]" />
+			</otherwise>
+		</choice>
+	</sub-flow>
+</mule>
