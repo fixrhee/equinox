@@ -1,15 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<mule xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core"
-	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
-	xmlns:spring="http://www.springframework.org/schema/beans" version="CE-3.7.0"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="
-http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-current.xsd
-http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd">
+<mule xmlns:json="http://www.mulesoft.org/schema/mule/json"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:jms="http://www.mulesoft.org/schema/mule/jms"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:spring="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.mulesoft.org/schema/mule/json http://www.mulesoft.org/schema/mule/json/current/mule-json.xsd http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-current.xsd
+http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/jms http://www.mulesoft.org/schema/mule/jms/current/mule-jms.xsd">
 
 	<sub-flow name="loginValidation">
-		<logger level="INFO" message="[Processing LOGIN Validation]" />
+		<logger level="INFO" message="[Processing LOGIN Validation]"
+			doc:name="Logger" />
+		<set-variable variableName="token" value="${api.ws.header.token}"
+			doc:name="Variable" />
 		<expression-component doc:name="Expression">
 		<![CDATA[
 			msg='<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:ser="http://services.bellatrix.org/">
@@ -32,7 +36,7 @@ http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/cor
 			doc:name="Byte Array to String" />
 		<set-variable value="#[xpath3('//status/message')]"
 			variableName="status" doc:name="Variable" />
-		<choice>
+		<choice doc:name="Choice">
 			<when expression="#[flowVars['status'] == 'PROCESSED']">
 				<foreach collection="#[xpath3('//customFields', payload, 'NODESET')]"
 					doc:name="For Each">
@@ -46,11 +50,66 @@ http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/cor
 						expression="#[originalPayload[tempHeader]=tempValue;originalPayload]"
 						doc:name="Expression" />
 				</foreach>
-				<set-payload value="ALLOWED" />
+				<set-payload value="ALLOWED" doc:name="Set Payload" />
 			</when>
 			<otherwise>
-				<set-payload value="#[flowVars['status']]" />
+				<set-payload value="#[flowVars['status']]" doc:name="Set Payload" />
 			</otherwise>
 		</choice>
 	</sub-flow>
+
+	<sub-flow name="tokenValidation">
+		<pooled-component>
+			<spring-object bean="JWTDecoder" />
+		</pooled-component>
+		<set-variable variableName="token" value="${api.ws.header.token}"
+			doc:name="Variable" />
+		<expression-component doc:name="Expression">
+		<![CDATA[
+			msg='<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:ser="http://services.bellatrix.org/">
+			   <soapenv:Header>
+			      <ser:headerAuth>
+			         <token>' + flowVars['token'] + '</token>
+			      </ser:headerAuth>
+			   </soapenv:Header>
+			   <soapenv:Body>
+			      <ser:loadMembersByUsername>
+			         <username>' + payload + '</username>
+			      </ser:loadMembersByUsername>
+			   </soapenv:Body>
+			</soapenv:Envelope>';
+			payload = msg;]]>
+		</expression-component>
+		<http:request config-ref="HTTP_Request_Configuration"
+			path="members" method="POST" doc:name="HTTP" />
+		<byte-array-to-string-transformer
+			doc:name="Byte Array to String" />
+		<set-variable value="#[xpath3('//status/message')]"
+			variableName="status" doc:name="Variable" />
+		<choice doc:name="Choice">
+			<when expression="#[flowVars['status'] == 'PROCESSED']">
+				<foreach collection="#[xpath3('//customFields', payload, 'NODESET')]"
+					doc:name="For Each">
+					<set-variable variableName="tempHeader"
+						value="#[xpath3('//customFields' + [counter] + '/internalName')]"
+						doc:name="Variable" />
+					<set-variable variableName="tempValue"
+						value="#[xpath3('//customFields' + [counter] + '/value')]"
+						doc:name="Variable" />
+					<expression-transformer
+						expression="#[originalPayload[tempHeader]=tempValue;originalPayload]"
+						doc:name="Expression" />
+				</foreach>
+				<set-payload value="#[originalPayload]" />
+				<pooled-component>
+					<spring-object bean="JWTValidation" />
+				</pooled-component>
+				<set-payload value="ALLOWED" doc:name="Set Payload" />
+			</when>
+			<otherwise>
+				<set-payload value="#[flowVars['status']]" doc:name="Set Payload" />
+			</otherwise>
+		</choice>
+	</sub-flow>
+
 </mule>

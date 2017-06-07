@@ -12,7 +12,7 @@ public class JWTValidation {
 	private String issuer;
 
 	public String verifyJWTHMAC256(HashMap<String, String> credential) throws Exception {
-		JWTVerifier verifier = JWT.require(Algorithm.HMAC256(credential.get("secret"))).withIssuer(getIssuer()).build();
+		JWTVerifier verifier = JWT.require(Algorithm.HMAC256(credential.get("auth_secret"))).withIssuer(getIssuer()).build();
 		DecodedJWT jwt = verifier.verify(credential.get("token"));
 		return jwt.getId();
 	}

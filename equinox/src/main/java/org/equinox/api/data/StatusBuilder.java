@@ -3,8 +3,12 @@ package org.equinox.api.data;
 public abstract class StatusBuilder {
 
 	public static ResponseStatus getStatus(String arg) {
-
-		return StatusBuilder.getStatus(Status.valueOf(arg));
+		try {
+			ResponseStatus rs = StatusBuilder.getStatus(Status.valueOf(arg));
+			return rs;
+		} catch (IllegalArgumentException e) {
+			return new ResponseStatus("E99", "UNDEFINED_ERROR", "Undefined Error");
+		}
 	}
 
 	public static ResponseStatus getStatus(Status arg) {

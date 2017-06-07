@@ -21,8 +21,6 @@ http://www.mulesoft.org/schema/mule/ws http://www.mulesoft.org/schema/mule/ws/cu
 				<expression-filter expression="#[payload['credential'] != null]" />
 			</and-filter>
 		</message-filter>
-		<set-variable variableName="token" value="${api.ws.header.token}"
-			doc:name="Variable" />
 		<flow-ref name="loginValidation" />
 		<logger level="INFO" message="#[originalPayload]" />
 		<choice doc:name="Choice">

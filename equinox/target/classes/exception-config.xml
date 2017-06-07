@@ -15,7 +15,8 @@ http://www.mulesoft.org/schema/mule/ws http://www.mulesoft.org/schema/mule/ws/cu
 	<flow name="invalidParameterFlow">
 		<expression-component doc:name="Expression">
 			<![CDATA[
-			responseMap = new org.equinox.api.data.SessionResponse('INVALID_PARAMETER');
+			responseMap = new java.util.HashMap();
+			responseMap['status'] = org.equinox.api.data.StatusBuilder.getStatus('INVALID_PARAMETER');
 			payload = responseMap;]]>
 		</expression-component>
 		<json:object-to-json-transformer
@@ -25,7 +26,8 @@ http://www.mulesoft.org/schema/mule/ws http://www.mulesoft.org/schema/mule/ws/cu
 	<flow name="invalidURLFlow">
 		<expression-component doc:name="Expression">
 			<![CDATA[
-			responseMap = new org.equinox.api.data.SessionResponse('INVALID_URL');
+			responseMap = new java.util.HashMap();
+			responseMap['status'] = org.equinox.api.data.StatusBuilder.getStatus('INVALID_URL');
 			payload = responseMap;]]>
 		</expression-component>
 		<json:object-to-json-transformer
@@ -38,7 +40,8 @@ http://www.mulesoft.org/schema/mule/ws http://www.mulesoft.org/schema/mule/ws/cu
 			doc:name="Catch Exception Strategy">
 			<expression-component doc:name="Expression">
 				<![CDATA[
-				responseMap = new org.equinox.api.data.SessionResponse('SESSION_EXPIRED');
+				responseMap = new java.util.HashMap();
+				responseMap['status'] = org.equinox.api.data.StatusBuilder.getStatus('SESSION_EXPIRED');
 				payload = responseMap;]]>
 			</expression-component>
 			<json:object-to-json-transformer
@@ -49,7 +52,8 @@ http://www.mulesoft.org/schema/mule/ws http://www.mulesoft.org/schema/mule/ws/cu
 			doc:name="Catch Exception Strategy">
 			<expression-component doc:name="Expression">
 				<![CDATA[
-				responseMap = new org.equinox.api.data.SessionResponse('INVALID_SIGNATURE');
+				responseMap = new java.util.HashMap();
+				responseMap['status'] = org.equinox.api.data.StatusBuilder.getStatus('INVALID_SIGNATURE');
 				payload = responseMap;]]>
 			</expression-component>
 			<json:object-to-json-transformer
@@ -60,7 +64,8 @@ http://www.mulesoft.org/schema/mule/ws http://www.mulesoft.org/schema/mule/ws/cu
 			doc:name="Catch Exception Strategy">
 			<expression-component doc:name="Expression">
 				<![CDATA[
-				responseMap = new org.equinox.api.data.SessionResponse('INVALID_SIGNATURE');
+				responseMap = new java.util.HashMap();
+				responseMap['status'] = org.equinox.api.data.StatusBuilder.getStatus('INVALID_SIGNATURE');
 				payload = responseMap;]]>
 			</expression-component>
 			<json:object-to-json-transformer
