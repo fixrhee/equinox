@@ -40,4 +40,8 @@ public class ResponseStatus {
 		this.description = description;
 	}
 
+	@Override
+	public String toString() {
+		return "[Response Code : " + responseCode + ", Message : " + message + ", Description : " + description + "]";
+	}
 }

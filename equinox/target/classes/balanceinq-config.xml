@@ -11,33 +11,38 @@ http://www.mulesoft.org/schema/mule/jms http://www.mulesoft.org/schema/mule/jms/
 http://www.mulesoft.org/schema/mule/json http://www.mulesoft.org/schema/mule/json/current/mule-json.xsd
 http://www.mulesoft.org/schema/mule/ws http://www.mulesoft.org/schema/mule/ws/current/mule-ws.xsd">
 
-	<flow name="loginConfigFlow">
+	<flow name="balanceInqConfigFlow">
+		<set-variable variableName="tokennc" value="${api.ws.header.token.nc}"
+			doc:name="Variable" />
 		<expression-component doc:name="Expression">
 		<![CDATA[
 			msg='<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:ser="http://services.bellatrix.org/">
-   			<soapenv:Header>
- 		     <ser:headerAuth>
- 	        <token>' + flowVars['token'] + '</token>
-			   </ser:headerAuth>
+			   <soapenv:Header>
+			      <ser:headerAuth>
+			         <token>' + flowVars['tokennc'] + '</token>
+			      </ser:headerAuth>
 			   </soapenv:Header>
 			   <soapenv:Body>
-			      <ser:validateCredential>
-			         <accessTypeID>1</accessTypeID>
-			         <credential>' + originalPayload['credential'] + '</credential>
-			         <username>' + originalPayload['username'] + '</username>
-			      </ser:validateCredential>
+			      <ser:loadBalanceInquiry>
+			            <accountID>' + originalPayload['accountID'] + '</accountID>
+			         <username>' + originalPayload['msisdn'] + '</username>
+			      </ser:loadBalanceInquiry>
 			   </soapenv:Body>
 			</soapenv:Envelope>';
 			payload = msg;]]>
 		</expression-component>
 		<http:request config-ref="HTTP_Request_Configuration"
-			path="access" method="POST" doc:name="HTTP" />
+			path="accounts" method="POST" doc:name="HTTP" />
 		<byte-array-to-string-transformer
 			doc:name="Byte Array to String" />
 		<set-variable value="#[xpath3('//status/message')]"
 			variableName="status" doc:name="Variable" />
+		<set-variable value="#[xpath3('//formattedBalance')]"
+			variableName="balance" doc:name="Variable" />
+		<set-variable value="#[xpath3('//formattedReservedAmount')]"
+			variableName="reserved" doc:name="Variable" />
 		<choice>
-			<when expression="#[flowVars['status'] == 'VALID']">
+			<when expression="#[flowVars['status'] == 'PROCESSED']">
 				<set-payload value="#[flowVars['originalPayload']]" />
 				<pooled-component>
 					<spring-object bean="JWTProcessor" />
@@ -45,7 +50,8 @@ http://www.mulesoft.org/schema/mule/ws http://www.mulesoft.org/schema/mule/ws/cu
 				<expression-component doc:name="Expression">
 					<![CDATA[
 					responseMap = new java.util.HashMap();
-					responseMap['token']=payload;
+					responseMap['balance']= flowVars['balance'];
+					responseMap['reservedAmount']= flowVars['reserved'];
 					responseMap['status']= org.equinox.api.data.StatusBuilder.getStatus('PROCESSED');			
 					payload = responseMap;]]>
 				</expression-component>
@@ -59,7 +65,11 @@ http://www.mulesoft.org/schema/mule/ws http://www.mulesoft.org/schema/mule/ws/cu
 				</expression-component>
 			</otherwise>
 		</choice>
-		<flow-ref name="responseHandlerFlow" />
+		<logger level="INFO"
+			message="[#[message.id] BALANCE-INQ Response : #[payload]]" />
+		<json:object-to-json-transformer
+			doc:name="Object 
+			to JSON" mapper-ref="NonNullMapper" />
 	</flow>
 
 </mule>

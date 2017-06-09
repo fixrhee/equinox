@@ -59,9 +59,7 @@ http://www.mulesoft.org/schema/mule/ws http://www.mulesoft.org/schema/mule/ws/cu
 				</expression-component>
 			</otherwise>
 		</choice>
-		<json:object-to-json-transformer
-			doc:name="Object 
-			to JSON" mapper-ref="NonNullMapper" />
+		<flow-ref name="responseHandlerFlow" />
 	</flow>
 
 </mule>

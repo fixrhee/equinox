@@ -11,6 +11,11 @@ public abstract class StatusBuilder {
 		}
 	}
 
+	public static String getHttpStatus(String arg) {
+		String rc = Status.valueOf(arg).httpStatusCode();
+		return rc;
+	}
+
 	public static ResponseStatus getStatus(Status arg) {
 		switch (arg) {
 		case PROCESSED:
@@ -26,6 +31,8 @@ public abstract class StatusBuilder {
 			return new ResponseStatus("A01", "VALID", "Credential Valid");
 		case BLOCKED:
 			return new ResponseStatus("A16", "BLOCKED", "Credential blocked");
+		case UNAUTHORIZED_MEMBER_ACCESS:
+			return new ResponseStatus("M16", "UNAUTHORIZED_MEMBER_ACCESS", "You don't have access to specified member");
 		case MEMBER_NOT_FOUND:
 			return new ResponseStatus("M14", "MEMBER_NOT_FOUND", "Member not found on system");
 		case DESTINATION_MEMBER_NOT_FOUND:

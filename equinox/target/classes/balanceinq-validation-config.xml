@@ -12,18 +12,29 @@ http://www.mulesoft.org/schema/mule/json http://www.mulesoft.org/schema/mule/jso
 http://www.mulesoft.org/schema/mule/ws http://www.mulesoft.org/schema/mule/ws/current/mule-ws.xsd">
 
 	<flow name="balanceInqValidationFlow">
-		<set-variable variableName="originalPayload" value="#[payload]"
-			doc:name="Variable" />
+		<message-filter onUnaccepted="invalidParameterFlow"
+			doc:name="Message">
+			<and-filter doc:name="And">
+				<expression-filter expression="#[originalPayload['token'] != null]" />
+				<expression-filter expression="#[originalPayload['msisdn'] != null]" />
+				<expression-filter expression="#[originalPayload['accountID'] != null]" />
+			</and-filter>
+		</message-filter>
+
 		<flow-ref name="tokenValidation" />
-		<expression-component doc:name="Expression">
-			<![CDATA[
-			responseMap = new java.util.HashMap();
-			responseMap['status']= org.equinox.api.data.StatusBuilder.getStatus(payload);			
-			payload = responseMap;]]>
-		</expression-component>
-		<json:object-to-json-transformer
-			doc:name="Object 
-			to JSON" mapper-ref="NonNullMapper" />
+		<message-filter onUnaccepted="requestValidationFlow"
+			doc:name="Message">
+			<expression-filter expression="#[payload == 'ALLOWED']" />
+		</message-filter>
+
+		<flow-ref name="accessValidation" />
+		<message-filter onUnaccepted="requestValidationFlow"
+			doc:name="Message">
+			<expression-filter expression="#[payload == 'ALLOWED']" />
+		</message-filter>
+
+		<set-payload value="#[originalPayload]" />
+		<flow-ref name="balanceInqConfigFlow" />
 	</flow>
 
 </mule>

@@ -12,7 +12,7 @@ public class MessageTransformer extends AbstractMessageTransformer {
 	@Override
 	@SuppressWarnings("unchecked")
 	public Object transformMessage(MuleMessage message, String outputEncoding) throws TransformerException {
-		HashMap<String, String> requestPayload = new HashMap<String, String>();
+		HashMap<String, Object> requestPayload = new HashMap<String, Object>();
 		requestPayload.putAll(message.getPayload(Map.class));
 		return requestPayload;
 	}

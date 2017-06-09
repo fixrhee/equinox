@@ -10,8 +10,6 @@ http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/htt
 http://www.mulesoft.org/schema/mule/jms http://www.mulesoft.org/schema/mule/jms/current/mule-jms.xsd">
 
 	<sub-flow name="loginValidation">
-		<logger level="INFO" message="[Processing LOGIN Validation]"
-			doc:name="Logger" />
 		<set-variable variableName="token" value="${api.ws.header.token}"
 			doc:name="Variable" />
 		<expression-component doc:name="Expression">
@@ -86,6 +84,10 @@ http://www.mulesoft.org/schema/mule/jms http://www.mulesoft.org/schema/mule/jms/
 			doc:name="Byte Array to String" />
 		<set-variable value="#[xpath3('//status/message')]"
 			variableName="status" doc:name="Variable" />
+		<set-variable value="#[xpath3('//members/id')]"
+			variableName="parentID" doc:name="Variable" />
+		<set-variable value="#[xpath3('//members/username')]"
+			variableName="parentUsername" doc:name="Variable" />
 		<choice doc:name="Choice">
 			<when expression="#[flowVars['status'] == 'PROCESSED']">
 				<foreach collection="#[xpath3('//customFields', payload, 'NODESET')]"
@@ -100,11 +102,113 @@ http://www.mulesoft.org/schema/mule/jms http://www.mulesoft.org/schema/mule/jms/
 						expression="#[originalPayload[tempHeader]=tempValue;originalPayload]"
 						doc:name="Expression" />
 				</foreach>
+				<expression-transformer
+					expression="#[originalPayload['parentID']=flowVars['parentID'];originalPayload]"
+					doc:name="Expression" />
+				<expression-transformer
+					expression="#[originalPayload['parentUsername']=flowVars['parentUsername'];originalPayload]"
+					doc:name="Expression" />
 				<set-payload value="#[originalPayload]" />
 				<pooled-component>
 					<spring-object bean="JWTValidation" />
 				</pooled-component>
 				<set-payload value="ALLOWED" doc:name="Set Payload" />
+			</when>
+			<otherwise>
+				<set-payload value="#[flowVars['status']]" doc:name="Set Payload" />
+			</otherwise>
+		</choice>
+	</sub-flow>
+
+	<sub-flow name="accessValidation">
+		<expression-component doc:name="Expression">
+		<![CDATA[
+			msg='<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:ser="http://services.bellatrix.org/">
+			   <soapenv:Header>
+			      <ser:headerAuth>
+			         <token>' + flowVars['token'] + '</token>
+			      </ser:headerAuth>
+			   </soapenv:Header>
+			   <soapenv:Body>
+			      <ser:loadMembersByUsername>
+			         <username>' + originalPayload['msisdn'] + '</username>
+			      </ser:loadMembersByUsername>
+			   </soapenv:Body>
+			</soapenv:Envelope>';
+			payload = msg;]]>
+		</expression-component>
+		<http:request config-ref="HTTP_Request_Configuration"
+			path="members" method="POST" doc:name="HTTP" />
+		<byte-array-to-string-transformer
+			doc:name="Byte Array to String" />
+		<set-variable value="#[xpath3('//status/message')]"
+			variableName="status" doc:name="Variable" />
+		<choice doc:name="Choice">
+			<when expression="#[flowVars['status'] == 'PROCESSED']">
+				<foreach collection="#[xpath3('//customFields', payload, 'NODESET')]"
+					doc:name="For Each">
+					<set-variable variableName="tempHeader"
+						value="#[xpath3('//customFields' + [counter] + '/internalName')]"
+						doc:name="Variable" />
+					<set-variable variableName="tempValue"
+						value="#[xpath3('//customFields' + [counter] + '/value')]"
+						doc:name="Variable" />
+					<expression-transformer
+						expression="#[originalPayload[tempHeader]=tempValue;originalPayload]"
+						doc:name="Expression" />
+				</foreach>
+
+				<set-variable variableName="externalMap" value="#[new java.util.HashMap()]"
+					doc:name="Variable" />
+
+				<choice>
+					<when
+						expression="#[originalPayload['parentUsername'] != originalPayload['msisdn']]">
+
+						<foreach collection="#[xpath3('//externalMembers', payload, 'NODESET')]"
+							doc:name="For Each">
+							<set-variable variableName="pid"
+								value="#[xpath3('//externalMembers' + [counter] + '/parentID')]"
+								doc:name="Variable" />
+							<set-variable variableName="externalID"
+								value="#[xpath3('//externalMembers' + [counter] + '/externalID')]"
+								doc:name="Variable" />
+							<set-variable variableName="description"
+								value="#[xpath3('//externalMembers' + [counter] + '/description')]"
+								doc:name="Variable" />
+							<expression-component doc:name="Expression"> 
+								<![CDATA[ externalMembers = new org.equinox.api.data.ExternalMembers(); 
+								externalMembers.parentID = flowVars['pid']; 
+								externalMembers.externalID = flowVars['externalID']; 
+								externalMembers.description = flowVars['description']; 
+								payload = externalMembers;]]>
+							</expression-component>
+							<expression-transformer expression="#[externalMap[pid]=payload;externalMap]"
+								doc:name="Expression" />
+						</foreach>
+						<set-variable value="#[originalPayload['parentID']]"
+							variableName="pid" />
+						<choice>
+							<when expression="#[flowVars['externalMap'][pid] != null]">
+								<expression-transformer
+									expression="#[originalPayload['externalMembers']=flowVars['externalMap'][pid];originalPayload]"
+									doc:name="Expression" />
+								<set-payload value="#[originalPayload]" />
+								<pooled-component>
+									<spring-object bean="JWTValidation" />
+								</pooled-component>
+								<set-payload value="ALLOWED" doc:name="Set Payload" />
+							</when>
+							<otherwise>
+								<set-payload value="UNAUTHORIZED_MEMBER_ACCESS"
+									doc:name="Set Payload" />
+							</otherwise>
+						</choice>
+					</when>
+					<otherwise>
+						<set-payload value="ALLOWED" doc:name="Set Payload" />
+					</otherwise>
+				</choice>
 			</when>
 			<otherwise>
 				<set-payload value="#[flowVars['status']]" doc:name="Set Payload" />
