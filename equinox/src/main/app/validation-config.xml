@@ -4,7 +4,8 @@
 	xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:jms="http://www.mulesoft.org/schema/mule/jms"
 	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
 	xmlns:spring="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://www.mulesoft.org/schema/mule/json http://www.mulesoft.org/schema/mule/json/current/mule-json.xsd http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-current.xsd
+	xsi:schemaLocation="http://www.mulesoft.org/schema/mule/json http://www.mulesoft.org/schema/mule/json/current/mule-json.xsd
+http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-current.xsd
 http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
 http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
 http://www.mulesoft.org/schema/mule/jms http://www.mulesoft.org/schema/mule/jms/current/mule-jms.xsd">
@@ -28,27 +29,48 @@ http://www.mulesoft.org/schema/mule/jms http://www.mulesoft.org/schema/mule/jms/
 			</soapenv:Envelope>';
 			payload = msg;]]>
 		</expression-component>
+		<set-payload
+			value="#[org.apache.commons.codec.binary.StringUtils.newStringUtf8(payload.getBytes())]" />
 		<http:request config-ref="HTTP_Request_Configuration"
 			path="members" method="POST" doc:name="HTTP" />
 		<byte-array-to-string-transformer
 			doc:name="Byte Array to String" />
 		<set-variable value="#[xpath3('//status/message')]"
 			variableName="status" doc:name="Variable" />
+		<set-variable value="[#[xpath3('//members/groupID')]]"
+			variableName="groupID" doc:name="Variable" />
+		<set-variable value="${api.allowed.group.id}"
+			variableName="listAllowedGroupID" doc:name="Variable" />
 		<choice doc:name="Choice">
 			<when expression="#[flowVars['status'] == 'PROCESSED']">
-				<foreach collection="#[xpath3('//customFields', payload, 'NODESET')]"
-					doc:name="For Each">
-					<set-variable variableName="tempHeader"
-						value="#[xpath3('//customFields' + [counter] + '/internalName')]"
-						doc:name="Variable" />
-					<set-variable variableName="tempValue"
-						value="#[xpath3('//customFields' + [counter] + '/value')]"
-						doc:name="Variable" />
-					<expression-transformer
-						expression="#[originalPayload[tempHeader]=tempValue;originalPayload]"
-						doc:name="Expression" />
-				</foreach>
-				<set-payload value="ALLOWED" doc:name="Set Payload" />
+				<choice doc:name="Choice">
+					<when
+						expression="#[org.apache.commons.lang.StringUtils.contains(listAllowedGroupID, groupID)]">
+						<foreach collection="#[xpath3('//customFields', payload, 'NODESET')]"
+							doc:name="For Each">
+							<set-variable variableName="tempHeader"
+								value="#[xpath3('//customFields' + [counter] + '/internalName')]"
+								doc:name="Variable" />
+							<set-variable variableName="tempValue"
+								value="#[xpath3('//customFields' + [counter] + '/value')]"
+								doc:name="Variable" />
+							<expression-transformer
+								expression="#[originalPayload[tempHeader]=tempValue;originalPayload]"
+								doc:name="Expression" />
+						</foreach>
+						<choice doc:name="Choice">
+							<when expression="#[originalPayload['auth_secret'] != null]">
+								<set-payload value="ALLOWED" doc:name="Set Payload" />
+							</when>
+							<otherwise>
+								<set-payload value="INVALID_PARAMETER" doc:name="Set Payload" />
+							</otherwise>
+						</choice>
+					</when>
+					<otherwise>
+						<set-payload value="UNAUTHORIZED_ACCESS" doc:name="Set Payload" />
+					</otherwise>
+				</choice>
 			</when>
 			<otherwise>
 				<set-payload value="#[flowVars['status']]" doc:name="Set Payload" />
@@ -78,6 +100,8 @@ http://www.mulesoft.org/schema/mule/jms http://www.mulesoft.org/schema/mule/jms/
 			</soapenv:Envelope>';
 			payload = msg;]]>
 		</expression-component>
+		<set-payload
+			value="#[org.apache.commons.codec.binary.StringUtils.newStringUtf8(payload.getBytes())]" />
 		<http:request config-ref="HTTP_Request_Configuration"
 			path="members" method="POST" doc:name="HTTP" />
 		<byte-array-to-string-transformer
@@ -108,7 +132,7 @@ http://www.mulesoft.org/schema/mule/jms http://www.mulesoft.org/schema/mule/jms/
 				<expression-transformer
 					expression="#[originalPayload['parentUsername']=flowVars['parentUsername'];originalPayload]"
 					doc:name="Expression" />
-				<set-payload value="#[originalPayload]" />
+				<set-payload value="#[originalPayload]" doc:name="Set Payload" />
 				<pooled-component>
 					<spring-object bean="JWTValidation" />
 				</pooled-component>
@@ -131,12 +155,14 @@ http://www.mulesoft.org/schema/mule/jms http://www.mulesoft.org/schema/mule/jms/
 			   </soapenv:Header>
 			   <soapenv:Body>
 			      <ser:loadMembersByUsername>
-			         <username>' + originalPayload['msisdn'] + '</username>
+			         <username>' + originalPayload['fromMember'] + '</username>
 			      </ser:loadMembersByUsername>
 			   </soapenv:Body>
 			</soapenv:Envelope>';
 			payload = msg;]]>
 		</expression-component>
+		<set-payload
+			value="#[org.apache.commons.codec.binary.StringUtils.newStringUtf8(payload.getBytes())]" />
 		<http:request config-ref="HTTP_Request_Configuration"
 			path="members" method="POST" doc:name="HTTP" />
 		<byte-array-to-string-transformer
@@ -161,7 +187,7 @@ http://www.mulesoft.org/schema/mule/jms http://www.mulesoft.org/schema/mule/jms/
 				<set-variable variableName="externalMap" value="#[new java.util.HashMap()]"
 					doc:name="Variable" />
 
-				<choice>
+				<choice doc:name="Choice">
 					<when
 						expression="#[originalPayload['parentUsername'] != originalPayload['msisdn']]">
 
@@ -187,13 +213,13 @@ http://www.mulesoft.org/schema/mule/jms http://www.mulesoft.org/schema/mule/jms/
 								doc:name="Expression" />
 						</foreach>
 						<set-variable value="#[originalPayload['parentID']]"
-							variableName="pid" />
-						<choice>
+							variableName="pid" doc:name="Variable" />
+						<choice doc:name="Choice">
 							<when expression="#[flowVars['externalMap'][pid] != null]">
 								<expression-transformer
 									expression="#[originalPayload['externalMembers']=flowVars['externalMap'][pid];originalPayload]"
 									doc:name="Expression" />
-								<set-payload value="#[originalPayload]" />
+								<set-payload value="#[originalPayload]" doc:name="Set Payload" />
 								<pooled-component>
 									<spring-object bean="JWTValidation" />
 								</pooled-component>

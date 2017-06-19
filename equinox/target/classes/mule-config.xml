@@ -15,8 +15,6 @@ http://www.mulesoft.org/schema/mule/ws http://www.mulesoft.org/schema/mule/ws/cu
 		<spring:import resource="classpath:app-context.xml" />
 	</spring:beans>
 
-
-
 	<!-- <jms:activemq-connector name="Active_MQ" specification="1.1" brokerURL="tcp://localhost:61616" 
 		cacheJmsSessions="true" disableTemporaryReplyToDestinations="true" durable="false" 
 		persistentDelivery="false" validateConnections="true" doc:name="Active MQ" 
@@ -26,7 +24,7 @@ http://www.mulesoft.org/schema/mule/ws http://www.mulesoft.org/schema/mule/ws/cu
 		host="0.0.0.0" port="8081" basePath="Host" doc:name="HTTP Listener Configuration" />
 
 	<http:request-config name="HTTP_Request_Configuration"
-		host="202.152.22.118" port="15443" basePath="api/bellatrix/host/services/ws"
+		host="202.152.22.118" port="15443" basePath="api/bellatrix/host/services/ws" 
 		doc:name="HTTP Request Configuration" />
 
 	<spring:beans>

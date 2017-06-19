@@ -26,10 +26,18 @@ http://www.mulesoft.org/schema/mule/https http://www.mulesoft.org/schema/mule/ht
 					caseSensitive="true" />
 			</not-filter>
 		</message-filter>
+		<set-variable value="#[message.id]" variableName="correlationID"
+			doc:name="Variable" />
 		<set-payload value="#[message.inboundProperties.'Authorization']" />
 		<choice>
 			<when expression="#[payload == null]">
-				<set-payload value="NOT OK" />
+				<expression-component doc:name="Expression">
+					<![CDATA[
+					responseMap = new java.util.HashMap();
+					responseMap['status']= org.equinox.api.data.StatusBuilder.getStatus('UNAUTHORIZED_ACCESS');			
+					payload = responseMap;]]>
+				</expression-component>
+				<flow-ref name="responseHandlerFlow" />
 			</when>
 			<otherwise>
 				<set-payload
@@ -49,9 +57,10 @@ http://www.mulesoft.org/schema/mule/https http://www.mulesoft.org/schema/mule/ht
 					expression="#[originalPayload['transactionType']=org.apache.commons.lang.StringUtils.substringAfterLast(message.inboundProperties.'http.relative.path', '/');originalPayload]"
 					doc:name="Expression" />
 				<logger level="INFO"
-					message="[#[message.id] LOGIN Request : #[originalPayload]]" />
+					message="[#[correlationID] LOGIN Request : #[originalPayload]]" />
 				<flow-ref name="loginValidationFlow" />
-				<logger level="INFO" message="[#[message.id] LOGIN Response : #[payload]]" />
+				<logger level="INFO"
+					message="[#[correlationID] LOGIN Response : #[payload]]" />
 			</otherwise>
 		</choice>
 	</flow>

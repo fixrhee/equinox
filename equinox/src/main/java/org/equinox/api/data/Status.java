@@ -24,8 +24,10 @@ public enum Status {
 	DESTINATION_CREDIT_LIMIT_REACHED(""), 
 	SESSION_EXPIRED("440"), 
 	INVALID_SIGNATURE("498"), 
-	INVALID_URL("404");
-	
+	INVALID_URL("404"),
+	UNDEFINED_ERROR("404"),
+	HOST_CONNECTION_TIMEOUT("599"),
+	HOST_CONNECTION_FAILED("598");
 	private String httpStatusCode;
 	
 	Status(String httpStatusCode){

@@ -25,7 +25,7 @@ http://www.mulesoft.org/schema/mule/ws http://www.mulesoft.org/schema/mule/ws/cu
 			   <soapenv:Body>
 			      <ser:loadBalanceInquiry>
 			            <accountID>' + originalPayload['accountID'] + '</accountID>
-			         <username>' + originalPayload['msisdn'] + '</username>
+			         <username>' + originalPayload['fromMember'] + '</username>
 			      </ser:loadBalanceInquiry>
 			   </soapenv:Body>
 			</soapenv:Envelope>';
@@ -41,17 +41,37 @@ http://www.mulesoft.org/schema/mule/ws http://www.mulesoft.org/schema/mule/ws/cu
 			variableName="balance" doc:name="Variable" />
 		<set-variable value="#[xpath3('//formattedReservedAmount')]"
 			variableName="reserved" doc:name="Variable" />
-		<choice>
+		<set-variable value="#[xpath3('//member/username')]"
+			variableName="username" doc:name="Variable" />
+		<set-variable value="#[xpath3('//member/name')]"
+			variableName="name" doc:name="Variable" />
+		<set-variable value="#[xpath3('//account/name')]"
+			variableName="accountName" doc:name="Variable" />
+		<set-variable value="#[xpath3('//account/id')]"
+			variableName="accountID" doc:name="Variable" />
+		<choice doc:name="Choice">
 			<when expression="#[flowVars['status'] == 'PROCESSED']">
-				<set-payload value="#[flowVars['originalPayload']]" />
+				<set-payload value="#[flowVars['originalPayload']]"
+					doc:name="Set Payload" />
 				<pooled-component>
 					<spring-object bean="JWTProcessor" />
 				</pooled-component>
+
 				<expression-component doc:name="Expression">
 					<![CDATA[
-					responseMap = new java.util.HashMap();
-					responseMap['balance']= flowVars['balance'];
+					memberMap = new java.util.HashMap();
+					memberMap['name']= flowVars['name'];
+					memberMap['username']= flowVars['username'];
+					
+					accountMap = new java.util.HashMap();
+					accountMap['name']= flowVars['accountName'];
+					accountMap['id']= flowVars['accountID'];
+
+					responseMap = new java.util.LinkedHashMap();
+					responseMap['accountBalance']= flowVars['balance'];
 					responseMap['reservedAmount']= flowVars['reserved'];
+					responseMap['member']= memberMap;
+					responseMap['account']= accountMap;
 					responseMap['status']= org.equinox.api.data.StatusBuilder.getStatus('PROCESSED');			
 					payload = responseMap;]]>
 				</expression-component>
@@ -65,11 +85,7 @@ http://www.mulesoft.org/schema/mule/ws http://www.mulesoft.org/schema/mule/ws/cu
 				</expression-component>
 			</otherwise>
 		</choice>
-		<logger level="INFO"
-			message="[#[message.id] BALANCE-INQ Response : #[payload]]" />
-		<json:object-to-json-transformer
-			doc:name="Object 
-			to JSON" mapper-ref="NonNullMapper" />
+		<flow-ref name="responseHandlerFlow" doc:name="Flow Reference" />
 	</flow>
 
 </mule>

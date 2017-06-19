@@ -11,16 +11,16 @@ http://www.mulesoft.org/schema/mule/jms http://www.mulesoft.org/schema/mule/jms/
 http://www.mulesoft.org/schema/mule/json http://www.mulesoft.org/schema/mule/json/current/mule-json.xsd
 http://www.mulesoft.org/schema/mule/ws http://www.mulesoft.org/schema/mule/ws/current/mule-ws.xsd">
 
-	<flow name="balanceInqValidationFlow">
+	<flow name="confirmPaymentValidationFlow">
 		<message-filter onUnaccepted="invalidParameterFlow"
 			doc:name="Message">
 			<and-filter doc:name="And">
 				<expression-filter expression="#[originalPayload['token'] != null]" />
-				<expression-filter expression="#[originalPayload['msisdn'] != null]" />
-				<expression-filter expression="#[originalPayload['accountID'] != null]" />
+				<expression-filter expression="#[originalPayload['requestID'] != null]" />
+				<expression-filter expression="#[originalPayload['otp'] != null]" />
 			</and-filter>
 		</message-filter>
-
+		
 		<flow-ref name="tokenValidation" />
 		<message-filter onUnaccepted="requestValidationFlow"
 			doc:name="Message">
@@ -34,7 +34,7 @@ http://www.mulesoft.org/schema/mule/ws http://www.mulesoft.org/schema/mule/ws/cu
 		</message-filter>
 
 		<set-payload value="#[originalPayload]" />
-		<flow-ref name="balanceInqConfigFlow" />
+		<flow-ref name="requestPaymentConfigFlow" />
 	</flow>
 
 </mule>
