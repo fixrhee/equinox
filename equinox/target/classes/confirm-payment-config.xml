@@ -31,6 +31,8 @@ http://www.mulesoft.org/schema/mule/ws http://www.mulesoft.org/schema/mule/ws/cu
 				</soapenv:Envelope>';
 			payload = msg;]]>
 		</expression-component>
+		<set-payload
+			value="#[org.apache.commons.codec.binary.StringUtils.newStringUtf8(payload.getBytes())]" />
 		<http:request config-ref="HTTP_Request_Configuration"
 			path="payments" method="POST" doc:name="HTTP" />
 		<byte-array-to-string-transformer
@@ -66,14 +68,20 @@ http://www.mulesoft.org/schema/mule/ws http://www.mulesoft.org/schema/mule/ws/cu
 					trxTypeMap = new java.util.HashMap();
 					trxTypeMap['name']= flowVars['trxType'];	
 					
-					responseMap = new java.util.HashMap();
-					responseMap['status']= org.equinox.api.data.StatusBuilder.getStatus('PROCESSED');		
+					responseMap = new java.util.LinkedHashMap();
+					responseMap['transactionType']= trxTypeMap;
 					responseMap['traceNumber']= flowVars['traceNumber'];	
 					responseMap['transactionNumber']= flowVars['transactionNumber'];	
 					responseMap['sourceAccount']= fromMemberMap;
 					responseMap['destinationAccount']= toMemberMap;
-					responseMap['transactionType']= trxTypeMap;
-					payload = responseMap;]]>
+					
+					responseList = new java.util.LinkedList();
+					responseList = [responseMap];
+					
+					confirmMap = new java.util.HashMap();
+					confirmMap['ConfirmPaymentResponse']= responseList;	
+					confirmMap['status']= org.equinox.api.data.StatusBuilder.getStatus('PROCESSED');			
+					payload = confirmMap;]]>
 				</expression-component>
 			</when>
 			<otherwise>

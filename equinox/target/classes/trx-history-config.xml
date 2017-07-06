@@ -114,9 +114,8 @@ http://www.mulesoft.org/schema/mule/ws http://www.mulesoft.org/schema/mule/ws/cu
 				expression="#[transferTypeFields['name']=flowVars.transferTypeName;transferTypeFields]"
 				doc:name="Expression" />
 			<expression-transformer
-				expression="#[trxPayload['transferType']=flowVars.transferTypeFields;trxPayload]"
+				expression="#[trxPayload['transactionType']=flowVars.transferTypeFields;trxPayload]"
 				doc:name="Expression" />
-
 			<expression-transformer
 				expression="#[fromMemberFields['name']=flowVars.fromName;fromMemberFields]"
 				doc:name="Expression" />
@@ -130,10 +129,10 @@ http://www.mulesoft.org/schema/mule/ws http://www.mulesoft.org/schema/mule/ws/cu
 				expression="#[toMemberFields['username']=flowVars.toUsername;toMemberFields]"
 				doc:name="Expression" />
 			<expression-transformer
-				expression="#[trxPayload['fromMember']=flowVars.fromMemberFields;trxPayload]"
+				expression="#[trxPayload['sourceAccount']=flowVars.fromMemberFields;trxPayload]"
 				doc:name="Expression" />
 			<expression-transformer
-				expression="#[trxPayload['toMember']=flowVars.toMemberFields;trxPayload]"
+				expression="#[trxPayload['destinationAccount']=flowVars.toMemberFields;trxPayload]"
 				doc:name="Expression" />
 
 			<expression-component doc:name="Expression">
@@ -145,7 +144,7 @@ http://www.mulesoft.org/schema/mule/ws http://www.mulesoft.org/schema/mule/ws/cu
 			<![CDATA[
 			responseMap = new java.util.HashMap();
 			responseMap['status']= org.equinox.api.data.StatusBuilder.getStatus('PROCESSED');			
-			responseMap['accountHistoryDetails']=flowVars['trxMaps'];	
+			responseMap['TransactionHistoryResponse']=flowVars['trxMaps'];	
 			payload = responseMap;]]>
 		</expression-component>
 		<flow-ref name="responseHandlerFlow" doc:name="Flow Reference" />

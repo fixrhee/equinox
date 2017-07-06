@@ -49,8 +49,14 @@ http://www.mulesoft.org/schema/mule/ws http://www.mulesoft.org/schema/mule/ws/cu
 			<when expression="#[flowVars['status'] == 'PROCESSED']">
 				<expression-component doc:name="Expression">
 					<![CDATA[
+					reqIdMap = new java.util.HashMap();
+					reqIdMap['requestID']= flowVars['reqID'];
+					
+					responseList = new java.util.LinkedList();
+					responseList = [reqIdMap];
+					
 					responseMap = new java.util.HashMap();
-					responseMap['requestID']= flowVars['reqID'];
+					responseMap['RequestPaymentResponse']= responseList;
 					responseMap['status']= org.equinox.api.data.StatusBuilder.getStatus('PROCESSED');			
 					payload = responseMap;]]>
 				</expression-component>

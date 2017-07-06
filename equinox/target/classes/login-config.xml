@@ -46,8 +46,14 @@ http://www.mulesoft.org/schema/mule/ws http://www.mulesoft.org/schema/mule/ws/cu
 					<![CDATA[
 					responseMap = new java.util.HashMap();
 					responseMap['token']=payload;
-					responseMap['status']= org.equinox.api.data.StatusBuilder.getStatus('PROCESSED');			
-					payload = responseMap;]]>
+					
+					responseList = new java.util.LinkedList();
+					responseList = [responseMap];
+					
+					loginMap = new java.util.HashMap();
+					loginMap['LoginResponse']= responseList;	
+					loginMap['status']= org.equinox.api.data.StatusBuilder.getStatus('PROCESSED');			
+					payload = loginMap;]]>
 				</expression-component>
 			</when>
 			<otherwise>

@@ -72,8 +72,14 @@ http://www.mulesoft.org/schema/mule/ws http://www.mulesoft.org/schema/mule/ws/cu
 					responseMap['reservedAmount']= flowVars['reserved'];
 					responseMap['member']= memberMap;
 					responseMap['account']= accountMap;
-					responseMap['status']= org.equinox.api.data.StatusBuilder.getStatus('PROCESSED');			
-					payload = responseMap;]]>
+					
+					responseList = new java.util.LinkedList();
+					responseList = [responseMap];
+			
+					balinqMap = new java.util.HashMap();
+					balinqMap['BalanceInquiryResponse']= responseList;	
+					balinqMap['status']= org.equinox.api.data.StatusBuilder.getStatus('PROCESSED');			
+					payload = balinqMap;]]>
 				</expression-component>
 			</when>
 			<otherwise>
