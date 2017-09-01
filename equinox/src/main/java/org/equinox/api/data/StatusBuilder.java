@@ -74,6 +74,9 @@ public abstract class StatusBuilder {
 			return new ResponseStatus("L21", "INVALID_SIGNATURE", "Invalid token signature");
 		case INVALID_URL:
 			return new ResponseStatus("B21", "INVALID_URL", "Invalid URL");
+		case PAYMENT_CODE_NOT_FOUND:
+			return new ResponseStatus("V14", "PAYMENT_CODE_NOT_FOUND",
+					"The specified Payment Code already expired or not found");
 		default:
 			return new ResponseStatus("E99", "UNKNOWN_ERROR", "Unknown Error");
 		}

@@ -1,31 +1,48 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<mule xmlns:ws="http://www.mulesoft.org/schema/mule/ws" xmlns:json="http://www.mulesoft.org/schema/mule/json"
-	xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:jms="http://www.mulesoft.org/schema/mule/jms"
-	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+<mule xmlns:vm="http://www.mulesoft.org/schema/mule/vm" xmlns:ws="http://www.mulesoft.org/schema/mule/ws"
+	xmlns:json="http://www.mulesoft.org/schema/mule/json" xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns:jms="http://www.mulesoft.org/schema/mule/jms" xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
 	xmlns:spring="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://www.mulesoft.org/schema/mule/json http://www.mulesoft.org/schema/mule/json/current/mule-json.xsd
 http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-current.xsd
 http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
 http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
 http://www.mulesoft.org/schema/mule/jms http://www.mulesoft.org/schema/mule/jms/current/mule-jms.xsd
-http://www.mulesoft.org/schema/mule/ws http://www.mulesoft.org/schema/mule/ws/current/mule-ws.xsd">
+http://www.mulesoft.org/schema/mule/ws http://www.mulesoft.org/schema/mule/ws/current/mule-ws.xsd
+http://www.mulesoft.org/schema/mule/vm http://www.mulesoft.org/schema/mule/vm/current/mule-vm.xsd">
 
 	<spring:beans>
 		<spring:import resource="classpath:app-context.xml" />
 	</spring:beans>
 
-	<!-- <jms:activemq-connector name="Active_MQ" specification="1.1" brokerURL="tcp://localhost:61616" 
-		cacheJmsSessions="true" disableTemporaryReplyToDestinations="true" durable="false" 
-		persistentDelivery="false" validateConnections="true" doc:name="Active MQ" 
-		/> -->
+	<spring:bean id="objectStore"
+		class="org.mule.util.store.SimpleMemoryObjectStore" />
+
+	<jms:activemq-connector name="Active_MQ"
+		specification="1.1"
+		brokerURL="failover:tcp://10.254.254.112:61616"
+		disableTemporaryReplyToDestinations="true" validateConnections="true"
+		doc:name="Active MQ" />
+
+	<http:listener-config name="HTTP_Listener_Test_Configuration"
+		host="0.0.0.0" port="7789" doc:name="HTTP Listener Test Configuration" />
 
 	<http:listener-config name="HTTP_Listener_Configuration"
-		host="0.0.0.0" port="8081" basePath="Host" doc:name="HTTP Listener Configuration" />
+		host="0.0.0.0" port="8081" basePath="Host/Optima" doc:name="HTTP Listener Configuration" />
 
 	<http:request-config name="HTTP_Request_Configuration"
-		host="202.152.22.118" port="15443" basePath="api/bellatrix/host/services/ws" 
+		host="202.152.22.118" port="15443" basePath="api/bellatrix/host/services/ws"
 		doc:name="HTTP Request Configuration" />
+
+	<http:request-config name="HTTP_VARequest_Configuration"
+		host="#[flowVars.host]" port="#[flowVars.port]" basePath="/"
+		doc:name="HTTP Request Configuration" />
+
+	<http:request-config name="HTTPS_VARequest_Configuration"
+		host="#[flowVars.host]" port="#[flowVars.port]" basePath="/"
+		doc:name="HTTPS Request Configuration" protocol="HTTPS" />
 
 	<spring:beans>
 		<spring:bean id="Bean" name="NonNullMapper"

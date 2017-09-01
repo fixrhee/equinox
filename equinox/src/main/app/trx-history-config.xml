@@ -34,7 +34,12 @@ http://www.mulesoft.org/schema/mule/ws http://www.mulesoft.org/schema/mule/ws/cu
 			payload = msg;]]>
 		</expression-component>
 		<http:request config-ref="HTTP_Request_Configuration"
-			path="accounts" method="POST" doc:name="HTTP" />
+			path="accounts" method="POST" doc:name="HTTP">
+			<http:request-builder>
+				<http:header headerName="soapaction"
+					value="&quot;loadTransactionHistory&quot;" />
+			</http:request-builder>
+		</http:request>
 		<byte-array-to-string-transformer
 			doc:name="Byte Array to String" />
 		<set-variable variableName="trxMaps"

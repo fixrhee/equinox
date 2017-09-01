@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ws="http://www.mulesoft.org/schema/mule/ws" xmlns:json="http://www.mulesoft.org/schema/mule/json"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:jms="http://www.mulesoft.org/schema/mule/jms"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:spring="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-current.xsd
+http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/jms http://www.mulesoft.org/schema/mule/jms/current/mule-jms.xsd
+http://www.mulesoft.org/schema/mule/json http://www.mulesoft.org/schema/mule/json/current/mule-json.xsd
+http://www.mulesoft.org/schema/mule/ws http://www.mulesoft.org/schema/mule/ws/current/mule-ws.xsd">
+
+	<flow name="vaRetrieveValidationFlow">
+		<message-filter onUnaccepted="invalidParameterFlow"
+			doc:name="Message">
+			<and-filter doc:name="And">
+				<expression-filter expression="#[originalPayload['token'] != null]" />
+				<expression-filter expression="#[originalPayload['paymentCode'] != null]" />
+			</and-filter>
+		</message-filter>
+		<flow-ref name="tokenValidation" />
+		<message-filter onUnaccepted="requestValidationFlow"
+			doc:name="Message">
+			<expression-filter expression="#[payload == 'ALLOWED']" />
+		</message-filter>
+		<flow-ref name="vaRetrieveMainConfigFlow" />
+	</flow>
+
+	<flow name="vaRequestValidationFlow">
+		<message-filter onUnaccepted="invalidParameterFlow"
+			doc:name="Message">
+			<and-filter doc:name="And">
+				<expression-filter expression="#[originalPayload['token'] != null]" />
+				<expression-filter expression="#[originalPayload['referenceNumber'] != null]" />
+				<expression-filter expression="#[originalPayload['amount'] != null]" />
+				<expression-filter expression="#[originalPayload['name'] != null]" />
+				<expression-filter expression="#[originalPayload['callbackUrl'] != null]" />
+			</and-filter>
+		</message-filter>
+
+		<set-variable
+			value="#[BankID = (originalPayload['bankId'] == null) ? ${api.va.default.bank.id} : originalPayload['bankId']]"
+			variableName="BankID" doc:name="Variable" />
+		<expression-transformer
+			expression="#[originalPayload['bankID']=flowVars['BankID'];originalPayload]"
+			doc:name="Expression" />
+
+		<set-variable
+			value="#[Persistent = (originalPayload['persistent'] == null) ? false : originalPayload['persistent']]"
+			variableName="Persistent" doc:name="Variable" />
+		<expression-transformer
+			expression="#[originalPayload['persistent']=flowVars['Persistent'];originalPayload]"
+			doc:name="Expression" />
+
+		<set-variable
+			value="#[ExpireAt = (originalPayload['expiredAtMinute'] == null) ? ${api.va.default.expired.minute} : originalPayload['expiredAtMinute']]"
+			variableName="ExpireAt" doc:name="Variable" />
+		<expression-transformer
+			expression="#[originalPayload['expiredAtMinute']=flowVars['ExpireAt'];originalPayload]"
+			doc:name="Expression" />
+
+		<set-variable
+			value="#[FullPayment = (originalPayload['fullPayment'] == null) ? 'true' : originalPayload['fullPayment']]"
+			variableName="FullPayment" doc:name="Variable" />
+		<expression-transformer
+			expression="#[originalPayload['fullPayment']=flowVars['FullPayment'];originalPayload]"
+			doc:name="Expression" />
+
+		<set-variable
+			value="#[MinPayment = (originalPayload['minimumPayment'] == null) ? '0' : originalPayload['minimumPayment']]"
+			variableName="MinPayment" doc:name="Variable" />
+		<expression-transformer
+			expression="#[originalPayload['minimumPayment']=flowVars['MinPayment'];originalPayload]"
+			doc:name="Expression" />
+
+		<flow-ref name="tokenValidation" />
+		<message-filter onUnaccepted="requestValidationFlow"
+			doc:name="Message">
+			<expression-filter expression="#[payload == 'ALLOWED']" />
+		</message-filter>
+
+		<set-payload value="#[originalPayload]" />
+		<flow-ref name="vaRequestMainConfigFlow" />
+	</flow>
+
+	<flow name="vaUpdateValidationFlow">
+		<message-filter onUnaccepted="invalidParameterFlow"
+			doc:name="Message">
+			<and-filter doc:name="And">
+				<expression-filter expression="#[originalPayload['token'] != null]" />
+				<expression-filter expression="#[originalPayload['paymentCode'] != null]" />
+			</and-filter>
+		</message-filter>
+
+		<flow-ref name="tokenValidation" />
+		<message-filter onUnaccepted="requestValidationFlow"
+			doc:name="Message">
+			<expression-filter expression="#[payload == 'ALLOWED']" />
+		</message-filter>
+
+		<set-payload value="#[originalPayload]" />
+		<flow-ref name="vaUpdateMainConfigFlow" />
+	</flow>
+
+	<flow name="vaDeleteValidationFlow">
+		<message-filter onUnaccepted="invalidParameterFlow"
+			doc:name="Message">
+			<and-filter doc:name="And">
+				<expression-filter expression="#[originalPayload['token'] != null]" />
+				<expression-filter expression="#[originalPayload['paymentCode'] != null]" />
+			</and-filter>
+		</message-filter>
+
+		<flow-ref name="tokenValidation" />
+		<message-filter onUnaccepted="requestValidationFlow"
+			doc:name="Message">
+			<expression-filter expression="#[payload == 'ALLOWED']" />
+		</message-filter>
+
+		<set-payload value="#[originalPayload]" />
+		<flow-ref name="vaDeleteMainConfigFlow" />
+	</flow>
+
+</mule>
