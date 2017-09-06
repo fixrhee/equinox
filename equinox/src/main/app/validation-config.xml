@@ -155,6 +155,18 @@ http://www.mulesoft.org/schema/mule/jms http://www.mulesoft.org/schema/mule/jms/
 		</choice>
 	</sub-flow>
 
+	<sub-flow name="hashValidation">
+		<set-variable variableName="auth_secret"
+			value="#[originalPayload['auth_secret']]" doc:name="Variable" />
+		<set-variable variableName="requestAuthContent"
+			value="#[originalPayload['requestAuthContent']]" doc:name="Variable" />
+		<set-variable variableName="requestAuth"
+			value="#[originalPayload['requestAuth']]" doc:name="Variable" />
+		<pooled-component>
+			<spring-object bean="HashValidation" />
+		</pooled-component>
+	</sub-flow>
+
 	<sub-flow name="accessValidation">
 		<expression-component doc:name="Expression">
 		<![CDATA[

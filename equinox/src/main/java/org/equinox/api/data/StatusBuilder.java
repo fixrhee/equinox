@@ -71,7 +71,7 @@ public abstract class StatusBuilder {
 		case SESSION_EXPIRED:
 			return new ResponseStatus("L17", "SESSION_EXPIRED", "Session token is already expired");
 		case INVALID_SIGNATURE:
-			return new ResponseStatus("L21", "INVALID_SIGNATURE", "Invalid token signature");
+			return new ResponseStatus("L21", "INVALID_SIGNATURE", "Invalid message signature");
 		case INVALID_URL:
 			return new ResponseStatus("B21", "INVALID_URL", "Invalid URL");
 		case PAYMENT_CODE_NOT_FOUND:

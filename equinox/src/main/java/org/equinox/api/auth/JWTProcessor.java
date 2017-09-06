@@ -2,11 +2,11 @@ package org.equinox.api.auth;
 
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Map;
 
 import org.joda.time.DateTime;
 import org.mule.api.MuleEventContext;
 import org.mule.api.lifecycle.Callable;
-import org.mule.module.http.internal.ParameterMap;
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 
@@ -21,8 +21,8 @@ public class JWTProcessor implements Callable {
 		DateTime added = dt.plusHours(24);
 		
 		@SuppressWarnings("unchecked")
-		HashMap<String, String> payload = (HashMap<String, String>) eventContext.getMessage().getPayload(HashMap.class);
-		return createJWTHMAC256(getIssuer(), getSubject(), payload.get("username"), payload.get("auth_secret"),
+		Map<String, Object> payload = (Map<String, Object>) eventContext.getMessage().getPayload(Map.class);
+		return createJWTHMAC256(getIssuer(), getSubject(), (String) payload.get("username"), (String) payload.get("auth_secret"),
 				added.toDate());
 
 	}

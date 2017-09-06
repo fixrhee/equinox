@@ -36,6 +36,7 @@ http://www.mulesoft.org/schema/mule/ws http://www.mulesoft.org/schema/mule/ws/cu
 				<expression-filter expression="#[originalPayload['amount'] != null]" />
 				<expression-filter expression="#[originalPayload['name'] != null]" />
 				<expression-filter expression="#[originalPayload['callbackUrl'] != null]" />
+				<expression-filter expression="#[originalPayload['requestAuth'] != null]" />
 			</and-filter>
 		</message-filter>
 
@@ -75,6 +76,12 @@ http://www.mulesoft.org/schema/mule/ws http://www.mulesoft.org/schema/mule/ws/cu
 			doc:name="Expression" />
 
 		<flow-ref name="tokenValidation" />
+		<message-filter onUnaccepted="requestValidationFlow"
+			doc:name="Message">
+			<expression-filter expression="#[payload == 'ALLOWED']" />
+		</message-filter>
+
+		<flow-ref name="hashValidation" />
 		<message-filter onUnaccepted="requestValidationFlow"
 			doc:name="Message">
 			<expression-filter expression="#[payload == 'ALLOWED']" />

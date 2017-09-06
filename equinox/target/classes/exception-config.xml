@@ -98,7 +98,8 @@ http://www.mulesoft.org/schema/mule/ws http://www.mulesoft.org/schema/mule/ws/cu
 
 
 	<flow name="vaDLQConfigFlow">
-		<logger level="INFO" message="DLQ : #[payload]" />
+		<logger level="INFO"
+			message="[Failed VA Notification DLQ: {#[message.id]} = #[payload]]" />
 	</flow>
 
 </mule>

@@ -22,4 +22,6 @@ http://www.springframework.org/schema/tx http://www.springframework.org/schema/t
 		<property name="issuer" value="${api.jwt.issuer.value}" />
 	</bean>
 
+	<bean id="HashValidation" class="org.equinox.api.auth.HashValidation" />
+
 </beans>

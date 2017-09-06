@@ -38,7 +38,7 @@ http://www.mulesoft.org/schema/mule/jms http://www.mulesoft.org/schema/mule/jms/
 				      <ser:registerVA>
 				         <amount>' + originalPayload['amount'] + '</amount>
 				         <bankID>' + originalPayload['bankID'] + '</bankID>
-				         <callbackURL>' + originalPayload['callBackUrl'] + '</callbackURL>
+				         <callbackURL>' + originalPayload['callbackUrl'] + '</callbackURL>
 				         <expiredAtMinute>' + originalPayload['expiredAtMinute'] + '</expiredAtMinute>
 				         <fullPayment>' + originalPayload['fullPayment'] + '</fullPayment>
 				         <minimumPayment>' + originalPayload['minimumPayment'] + '</minimumPayment>
@@ -51,7 +51,6 @@ http://www.mulesoft.org/schema/mule/jms http://www.mulesoft.org/schema/mule/jms/
 				</soapenv:Envelope>';
 			payload = msg;]]>
 		</expression-component>
-		<logger level="INFO" message="#[payload]" doc:name="Logger" />
 		<http:request config-ref="HTTP_Request_Configuration"
 			path="virtualaccount" method="POST" doc:name="HTTP">
 			<http:request-builder>
@@ -60,7 +59,6 @@ http://www.mulesoft.org/schema/mule/jms http://www.mulesoft.org/schema/mule/jms/
 		</http:request>
 		<byte-array-to-string-transformer
 			doc:name="Byte Array to String" />
-		<logger level="INFO" message="#[payload]" doc:name="Logger" />
 		<set-variable value="#[xpath3('//status/message')]"
 			variableName="status" doc:name="Variable" />
 		<choice doc:name="Choice">
@@ -141,7 +139,6 @@ http://www.mulesoft.org/schema/mule/jms http://www.mulesoft.org/schema/mule/jms/
 				</soapenv:Envelope>';
 			payload = msg;]]>
 		</expression-component>
-		<logger level="INFO" message="#[payload]" doc:name="Logger" />
 		<http:request config-ref="HTTP_Request_Configuration"
 			path="virtualaccount" method="POST" doc:name="HTTP">
 			<http:request-builder>
@@ -150,7 +147,6 @@ http://www.mulesoft.org/schema/mule/jms http://www.mulesoft.org/schema/mule/jms/
 		</http:request>
 		<byte-array-to-string-transformer
 			doc:name="Byte Array to String" />
-		<logger level="INFO" message="#[payload]" doc:name="Logger" />
 		<set-variable value="#[xpath3('//status/message')]"
 			variableName="status" doc:name="Variable" />
 		<choice doc:name="Choice">
@@ -265,7 +261,6 @@ http://www.mulesoft.org/schema/mule/jms http://www.mulesoft.org/schema/mule/jms/
 				</soapenv:Envelope>';
 			payload = msg;]]>
 		</expression-component>
-		<logger level="INFO" message="#[payload]" doc:name="Logger" />
 		<http:request config-ref="HTTP_Request_Configuration"
 			path="virtualaccount" method="POST" doc:name="HTTP">
 			<http:request-builder>
@@ -338,7 +333,6 @@ http://www.mulesoft.org/schema/mule/jms http://www.mulesoft.org/schema/mule/jms/
 	<flow name="vaNotificationConfigFlow">
 		<jms:inbound-endpoint connector-ref="Active_MQ"
 			queue="va.notification" doc:name="JMS" />
-		<logger level="INFO" message="#[payload]" doc:name="Logger" />
 		<set-variable variableName="url"
 			value="#[new URL(payload['callbackURL']);]" doc:name="Variable" />
 
@@ -355,7 +349,7 @@ http://www.mulesoft.org/schema/mule/jms http://www.mulesoft.org/schema/mule/jms/
 		<choice doc:name="Choice">
 			<when expression="#[flowVars.protocol == 'http']">
 				<logger level="INFO"
-					message="[SENDING HTTP Notification TO: #[payload.callbackURL]]"
+					message="[SENDING VA HTTP Notification: {#[message.id]} = #[payload]]"
 					doc:name="Logger" />
 				<until-successful objectStore-ref="objectStore"
 					deadLetterQueue-ref="vaDLQConfigFlow" failureExpression="#[header:INBOUND:http.status != 200]"
@@ -367,7 +361,7 @@ http://www.mulesoft.org/schema/mule/jms http://www.mulesoft.org/schema/mule/jms/
 			</when>
 			<otherwise>
 				<logger level="INFO"
-					message="[SENDING HTTPS Notification TO: #[payload.callbackURL]]"
+					message="[SENDING VA HTTPS Notification: : {#[message.id]} = #[payload]]"
 					doc:name="Logger" />
 				<until-successful objectStore-ref="objectStore"
 					deadLetterQueue-ref="vaDLQConfigFlow" failureExpression="#[header:INBOUND:http.status != 200]"
