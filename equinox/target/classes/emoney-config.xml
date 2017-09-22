@@ -33,11 +33,11 @@ http://www.mulesoft.org/schema/mule/ws http://www.mulesoft.org/schema/mule/ws/cu
 			expression="#[originalPayload['transactionType']=org.apache.commons.lang.StringUtils.substringAfterLast(message.inboundProperties.'http.relative.path', '/');originalPayload]"
 			doc:name="Expression" />
 		<logger level="INFO"
-			message="[#[correlationID] BALANCE-INQ Request : #[originalPayload]]"
+			message="[{#[correlationID]} : BALANCE-INQ Request = #[originalPayload]]"
 			doc:name="Logger" />
 		<flow-ref name="balanceInqValidationFlow" doc:name="Flow Reference" />
 		<logger level="INFO"
-			message="[#[correlationID] BALANCE-INQ Response : #[payload]]"
+			message="[{#[correlationID]} BALANCE-INQ Response = #[payload]]"
 			doc:name="Logger" />
 		<exception-strategy ref="sessionException"
 			doc:name="Reference Exception Strategy" />
@@ -65,11 +65,11 @@ http://www.mulesoft.org/schema/mule/ws http://www.mulesoft.org/schema/mule/ws/cu
 			expression="#[originalPayload['transactionType']=org.apache.commons.lang.StringUtils.substringAfterLast(message.inboundProperties.'http.relative.path', '/');originalPayload]"
 			doc:name="Expression" />
 		<logger level="INFO"
-			message="[#[correlationID] TRX-HISTORY Request : #[originalPayload]]"
+			message="[{#[correlationID]} : TRX-HISTORY Request = #[originalPayload]]"
 			doc:name="Logger" />
 		<flow-ref name="trxHistoryValidationFlow" doc:name="Flow Reference" />
 		<logger level="INFO"
-			message="[#[correlationID] TRX-HISTORY Response : #[payload]]"
+			message="[{#[correlationID]} : TRX-HISTORY Response = #[payload]]"
 			doc:name="Logger" />
 		<exception-strategy ref="sessionException"
 			doc:name="Reference Exception Strategy" />
@@ -95,11 +95,11 @@ http://www.mulesoft.org/schema/mule/ws http://www.mulesoft.org/schema/mule/ws/cu
 			expression="#[originalPayload['transactionType']=org.apache.commons.lang.StringUtils.substringAfterLast(message.inboundProperties.'http.relative.path', '/');originalPayload]"
 			doc:name="Expression" />
 		<logger level="INFO"
-			message="[#[correlationID] RequestPAYMENT Request : #[originalPayload]]"
+			message="[{#[correlationID]} : REQUEST-PAYMENT Request = #[originalPayload]]"
 			doc:name="Logger" />
 		<flow-ref name="requestPaymentValidationFlow" doc:name="Flow Reference" />
 		<logger level="INFO"
-			message="[#[correlationID] RequestPAYMENT Response : #[payload]]" doc:name="Logger" />
+			message="[{#[correlationID]} : REQUEST-PAYMENT Response = #[payload]]" doc:name="Logger" />
 		<exception-strategy ref="sessionException"
 			doc:name="Reference Exception Strategy" />
 	</flow>
@@ -124,11 +124,11 @@ http://www.mulesoft.org/schema/mule/ws http://www.mulesoft.org/schema/mule/ws/cu
 			expression="#[originalPayload['transactionType']=org.apache.commons.lang.StringUtils.substringAfterLast(message.inboundProperties.'http.relative.path', '/');originalPayload]"
 			doc:name="Expression" />
 		<logger level="INFO"
-			message="[#[correlationID] ConfirmPAYMENT Request : #[originalPayload]]"
+			message="[{#[correlationID]} : CONFIRM-PAYMENT Request = #[originalPayload]]"
 			doc:name="Logger" />
 		<flow-ref name="confirmPaymentValidationFlow" doc:name="Flow Reference" />
 		<logger level="INFO"
-			message="[#[correlationID] ConfirmPAYMENT Response : #[payload]]" doc:name="Logger" />
+			message="[{#[correlationID]} : CONFIRM-PAYMENT Response = #[payload]]" doc:name="Logger" />
 		<exception-strategy ref="sessionException"
 			doc:name="Reference Exception Strategy" />
 	</flow>

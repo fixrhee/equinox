@@ -15,25 +15,21 @@ http://www.mulesoft.org/schema/mule/vm http://www.mulesoft.org/schema/mule/vm/cu
 
 	<spring:beans>
 		<spring:import resource="classpath:app-context.xml" />
+		<spring:import resource="classpath:hazelcast-context.xml" />
+		<spring:bean id="objectStore"
+			class="org.mule.util.store.SimpleMemoryObjectStore" />
 	</spring:beans>
 
-	<spring:bean id="objectStore"
-		class="org.mule.util.store.SimpleMemoryObjectStore" />
-
 	<jms:activemq-connector name="Active_MQ"
-		specification="1.1"
-		brokerURL="failover:tcp://10.254.254.112:61616"
+		specification="1.1" brokerURL="failover:tcp://localhost:61616"
 		disableTemporaryReplyToDestinations="true" validateConnections="true"
 		doc:name="Active MQ" />
 
-	<http:listener-config name="HTTP_Listener_Test_Configuration"
-		host="0.0.0.0" port="7789" doc:name="HTTP Listener Test Configuration" />
-
 	<http:listener-config name="HTTP_Listener_Configuration"
-		host="0.0.0.0" port="8081" basePath="Host/Optima" doc:name="HTTP Listener Configuration" />
+		host="0.0.0.0" port="8670" basePath="Host/Optima" doc:name="HTTP Listener Configuration" />
 
 	<http:request-config name="HTTP_Request_Configuration"
-		host="202.152.22.118" port="15443" basePath="api/bellatrix/host/services/ws"
+		host="localhost" port="8081" basePath="bellatrix/host/services/ws"
 		doc:name="HTTP Request Configuration" />
 
 	<http:request-config name="HTTP_VARequest_Configuration"
@@ -43,6 +39,11 @@ http://www.mulesoft.org/schema/mule/vm http://www.mulesoft.org/schema/mule/vm/cu
 	<http:request-config name="HTTPS_VARequest_Configuration"
 		host="#[flowVars.host]" port="#[flowVars.port]" basePath="/"
 		doc:name="HTTPS Request Configuration" protocol="HTTPS" />
+
+	<vm:connector name="Notification_VM" validateConnections="true"
+		doc:name="VM" />
+	<vm:endpoint exchange-pattern="one-way" path="notification"
+		connector-ref="Notification_VM" name="NotificationVM" doc:name="VM" />
 
 	<spring:beans>
 		<spring:bean id="Bean" name="NonNullMapper"

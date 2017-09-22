@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ws="http://www.mulesoft.org/schema/mule/ws" xmlns:json="http://www.mulesoft.org/schema/mule/json"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:jms="http://www.mulesoft.org/schema/mule/jms"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:spring="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-current.xsd
+http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/jms http://www.mulesoft.org/schema/mule/jms/current/mule-jms.xsd
+http://www.mulesoft.org/schema/mule/json http://www.mulesoft.org/schema/mule/json/current/mule-json.xsd
+http://www.mulesoft.org/schema/mule/ws http://www.mulesoft.org/schema/mule/ws/current/mule-ws.xsd">
+
+	<flow name="memberInquiryValidationFlow">
+		<message-filter onUnaccepted="invalidParameterFlow"
+			doc:name="Message">
+			<and-filter doc:name="And">
+				<expression-filter expression="#[originalPayload['fromMember'] != null]" />
+				<expression-filter expression="#[originalPayload['token'] != null]" />
+			</and-filter>
+		</message-filter>
+
+		<flow-ref name="tokenValidation" doc:name="Flow Reference"/>
+		<message-filter onUnaccepted="requestValidationFlow"
+			doc:name="Message">
+			<expression-filter expression="#[payload == 'ALLOWED']" />
+		</message-filter>
+
+		<flow-ref name="accessValidation" doc:name="Flow Reference"/>
+		<message-filter onUnaccepted="requestValidationFlow"
+			doc:name="Message">
+			<expression-filter expression="#[payload == 'ALLOWED']" />
+		</message-filter>
+
+		<set-payload value="#[originalPayload]" doc:name="Set Payload"/>
+		<flow-ref name="memberInquiryConfigFlow" doc:name="Flow Reference"/>
+	</flow>
+
+	<flow name="memberRegisterValidationFlow">
+		<message-filter onUnaccepted="invalidParameterFlow"
+			doc:name="Message">
+			<and-filter doc:name="And">
+				<expression-filter expression="#[originalPayload['name'] != null]" />
+				<expression-filter expression="#[originalPayload['email'] != null]" />
+				<expression-filter expression="#[originalPayload['credential'] != null]" />
+				<expression-filter expression="#[originalPayload['otp'] != null]" />
+				<expression-filter expression="#[originalPayload['ticketID'] != null]" />
+				<expression-filter expression="#[originalPayload['token'] != null]" />
+			</and-filter>
+		</message-filter>
+
+		<set-variable
+			value="#[GroupID = (originalPayload['groupID'] == null) ? ${api.member.default.group.id} : originalPayload['groupID']]"
+			variableName="GroupID" doc:name="Variable" />
+		<expression-transformer
+			expression="#[originalPayload['groupID']=flowVars['GroupID'];originalPayload]"
+			doc:name="Expression" />
+
+		<flow-ref name="tokenValidation" doc:name="Flow Reference"/>
+		<message-filter onUnaccepted="requestValidationFlow"
+			doc:name="Message">
+			<expression-filter expression="#[payload == 'ALLOWED']" />
+		</message-filter>
+
+		<set-payload value="#[originalPayload]" doc:name="Set Payload"/>
+		<flow-ref name="memberRegisterConfigFlow" doc:name="Flow Reference"/>
+	</flow>
+
+	<flow name="memberRegisterReqValidationFlow">
+		<message-filter onUnaccepted="invalidParameterFlow"
+			doc:name="Message">
+			<and-filter doc:name="And">
+				<expression-filter expression="#[originalPayload['msisdn'] != null]" />
+				<expression-filter expression="#[originalPayload['token'] != null]" />
+			</and-filter>
+		</message-filter>
+
+		<flow-ref name="tokenValidation" doc:name="Flow Reference"/>
+		<message-filter onUnaccepted="requestValidationFlow"
+			doc:name="Message">
+			<expression-filter expression="#[payload == 'ALLOWED']" />
+		</message-filter>
+
+		<set-payload value="#[originalPayload]" doc:name="Set Payload"/>
+		<flow-ref name="memberRegisterRequestConfigFlow" doc:name="Flow Reference"/>
+	</flow>
+
+</mule>

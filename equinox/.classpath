@@ -10,6 +10,8 @@
   <classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
   <classpathentry kind="var" path="M2_REPO/org/apache/activemq/activemq-all/5.15.0/activemq-all-5.15.0.jar"/>
   <classpathentry kind="var" path="M2_REPO/org/bouncycastle/bcprov-jdk15on/1.55/bcprov-jdk15on-1.55.jar"/>
+  <classpathentry kind="var" path="M2_REPO/com/hazelcast/hazelcast/3.8.2/hazelcast-3.8.2.jar"/>
+  <classpathentry kind="var" path="M2_REPO/com/hazelcast/hazelcast-spring/3.8.2/hazelcast-spring-3.8.2.jar"/>
   <classpathentry kind="var" path="M2_REPO/com/fasterxml/jackson/core/jackson-annotations/2.8.0/jackson-annotations-2.8.0.jar"/>
   <classpathentry kind="var" path="M2_REPO/com/fasterxml/jackson/core/jackson-core/2.8.4/jackson-core-2.8.4.jar"/>
   <classpathentry kind="var" path="M2_REPO/com/fasterxml/jackson/core/jackson-databind/2.8.4/jackson-databind-2.8.4.jar"/>

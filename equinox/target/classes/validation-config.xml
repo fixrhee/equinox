@@ -40,7 +40,6 @@ http://www.mulesoft.org/schema/mule/jms http://www.mulesoft.org/schema/mule/jms/
 		</http:request>
 		<byte-array-to-string-transformer
 			doc:name="Byte Array to String" />
-		<logger level="INFO" message="#[payload]" />
 		<set-variable value="#[xpath3('//status/message')]"
 			variableName="status" doc:name="Variable" />
 		<set-variable value="[#[xpath3('//members/groupID')]]"
@@ -67,19 +66,27 @@ http://www.mulesoft.org/schema/mule/jms http://www.mulesoft.org/schema/mule/jms/
 						<choice doc:name="Choice">
 							<when expression="#[originalPayload['auth_secret'] != null]">
 								<set-payload value="ALLOWED" doc:name="Set Payload" />
+								<logger level="INFO"
+									message="[VALIDATION : USER #[originalPayload['username']] ALLOWED To LOGIN]" />
 							</when>
 							<otherwise>
 								<set-payload value="INVALID_PARAMETER" doc:name="Set Payload" />
+								<logger level="INFO"
+									message="[VALIDATION : USER (#[originalPayload['username']]) FAILED To LOGIN : INVALID PARAMETER]" />
 							</otherwise>
 						</choice>
 					</when>
 					<otherwise>
 						<set-payload value="UNAUTHORIZED_ACCESS" doc:name="Set Payload" />
+						<logger level="INFO"
+							message="[VALIDATION : USER (#[originalPayload['username']]) FAILED To LOGIN : UNAUTHORIZED_ACCESS]" />
 					</otherwise>
 				</choice>
 			</when>
 			<otherwise>
 				<set-payload value="#[flowVars['status']]" doc:name="Set Payload" />
+				<logger level="INFO"
+					message="[VALIDATION : USER (#[originalPayload['username']]) FAILED To LOGIN : #[flowVars['status']]]" />
 			</otherwise>
 		</choice>
 	</sub-flow>
@@ -121,6 +128,8 @@ http://www.mulesoft.org/schema/mule/jms http://www.mulesoft.org/schema/mule/jms/
 			variableName="status" doc:name="Variable" />
 		<set-variable value="#[xpath3('//members/id')]"
 			variableName="parentID" doc:name="Variable" />
+		<set-variable value="#[xpath3('//members/name')]"
+			variableName="parentName" doc:name="Variable" />
 		<set-variable value="#[xpath3('//members/username')]"
 			variableName="parentUsername" doc:name="Variable" />
 		<choice doc:name="Choice">
@@ -141,6 +150,9 @@ http://www.mulesoft.org/schema/mule/jms http://www.mulesoft.org/schema/mule/jms/
 					expression="#[originalPayload['parentID']=flowVars['parentID'];originalPayload]"
 					doc:name="Expression" />
 				<expression-transformer
+					expression="#[originalPayload['parentName']=flowVars['parentName'];originalPayload]"
+					doc:name="Expression" />
+				<expression-transformer
 					expression="#[originalPayload['parentUsername']=flowVars['parentUsername'];originalPayload]"
 					doc:name="Expression" />
 				<set-payload value="#[originalPayload]" doc:name="Set Payload" />
@@ -148,9 +160,13 @@ http://www.mulesoft.org/schema/mule/jms http://www.mulesoft.org/schema/mule/jms/
 					<spring-object bean="JWTValidation" />
 				</pooled-component>
 				<set-payload value="ALLOWED" doc:name="Set Payload" />
+				<logger level="INFO"
+					message="[VALIDATION : TOKEN Validation (#[originalPayload['parentUsername']]) SUCCESS]" />
 			</when>
 			<otherwise>
 				<set-payload value="#[flowVars['status']]" doc:name="Set Payload" />
+				<logger level="INFO"
+					message="[VALIDATION : TOKEN Validation (#[originalPayload['parentUsername']]) FAILED : #[flowVars['status']]]" />
 			</otherwise>
 		</choice>
 	</sub-flow>
@@ -165,6 +181,8 @@ http://www.mulesoft.org/schema/mule/jms http://www.mulesoft.org/schema/mule/jms/
 		<pooled-component>
 			<spring-object bean="HashValidation" />
 		</pooled-component>
+		<logger level="INFO"
+			message="[VALIDATION : HASH Validation (#[originalPayload['parentUsername']]) Status : #[payload]]" />
 	</sub-flow>
 
 	<sub-flow name="accessValidation">
@@ -252,10 +270,14 @@ http://www.mulesoft.org/schema/mule/jms http://www.mulesoft.org/schema/mule/jms/
 									<spring-object bean="JWTValidation" />
 								</pooled-component>
 								<set-payload value="ALLOWED" doc:name="Set Payload" />
+								<logger level="INFO"
+									message="[VALIDATION : USER (#[originalPayload['parentUsername']]) IS ALLOWED To Access member #[originalPayload['fromMember']]]" />
 							</when>
 							<otherwise>
 								<set-payload value="UNAUTHORIZED_MEMBER_ACCESS"
 									doc:name="Set Payload" />
+								<logger level="INFO"
+									message="[VALIDATION : USER (#[originalPayload['parentUsername']]) IS NOT ALLOWED To Access member #[originalPayload['fromMember']]]" />
 							</otherwise>
 						</choice>
 					</when>

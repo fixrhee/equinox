@@ -25,6 +25,7 @@ public class MessageTransformer extends AbstractMessageTransformer {
 			requestPayload.put("requestAuthContent", sb.toString());
 			return requestPayload;
 		} else {
+			System.out.println("Payload : " + message.getPayload());
 			Map<String, Object> requestPayload = new TreeMap<String, Object>();
 			requestPayload.putAll(message.getPayload(Map.class));
 			StringBuffer sb = new StringBuffer();

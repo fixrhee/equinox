@@ -106,6 +106,12 @@ http://www.mulesoft.org/schema/mule/ws http://www.mulesoft.org/schema/mule/ws/cu
 			<expression-filter expression="#[payload == 'ALLOWED']" />
 		</message-filter>
 
+		<flow-ref name="hashValidation" />
+		<message-filter onUnaccepted="requestValidationFlow"
+			doc:name="Message">
+			<expression-filter expression="#[payload == 'ALLOWED']" />
+		</message-filter>
+
 		<set-payload value="#[originalPayload]" />
 		<flow-ref name="vaUpdateMainConfigFlow" />
 	</flow>
@@ -120,6 +126,12 @@ http://www.mulesoft.org/schema/mule/ws http://www.mulesoft.org/schema/mule/ws/cu
 		</message-filter>
 
 		<flow-ref name="tokenValidation" />
+		<message-filter onUnaccepted="requestValidationFlow"
+			doc:name="Message">
+			<expression-filter expression="#[payload == 'ALLOWED']" />
+		</message-filter>
+
+		<flow-ref name="hashValidation" />
 		<message-filter onUnaccepted="requestValidationFlow"
 			doc:name="Message">
 			<expression-filter expression="#[payload == 'ALLOWED']" />

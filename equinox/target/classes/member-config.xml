@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ws="http://www.mulesoft.org/schema/mule/ws" xmlns:json="http://www.mulesoft.org/schema/mule/json"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:jms="http://www.mulesoft.org/schema/mule/jms"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:spring="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-current.xsd
+http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/jms http://www.mulesoft.org/schema/mule/jms/current/mule-jms.xsd
+http://www.mulesoft.org/schema/mule/json http://www.mulesoft.org/schema/mule/json/current/mule-json.xsd
+http://www.mulesoft.org/schema/mule/ws http://www.mulesoft.org/schema/mule/ws/current/mule-ws.xsd">
+
+	<flow name="memberRegisterProfileFlow">
+		<http:listener config-ref="HTTP_Listener_Configuration"
+			path="Member" allowedMethods="GET,POST" doc:name="HTTP">
+		</http:listener>
+		<message-filter doc:name="Filter favicon">
+			<not-filter>
+				<wildcard-filter pattern="/favicon.ico"
+					caseSensitive="true" />
+			</not-filter>
+		</message-filter>
+		<set-variable value="#[message.inboundProperties.'http.method']"
+			variableName="method" doc:name="Variable" />
+		<custom-transformer class="org.equinox.api.data.MessageTransformer"
+			doc:name="Java" />
+		<set-variable variableName="originalPayload" value="#[payload]"
+			doc:name="Variable" />
+		<set-variable value="#[message.id]" variableName="correlationID"
+			doc:name="Variable" />
+		<expression-transformer
+			expression="#[originalPayload['transactionType']=org.apache.commons.lang.StringUtils.substringAfterLast(message.inboundProperties.'http.relative.path', '/');originalPayload]"
+			doc:name="Expression" />
+		<choice doc:name="Choice">
+			<when expression="#[method == 'GET']">
+				<logger level="INFO"
+					message="[{#[correlationID]} : MEMBER-INQUIRY Request = #[originalPayload]]"
+					doc:name="Logger" />
+				<flow-ref name="memberInquiryValidationFlow" doc:name="Flow Reference" />
+				<logger level="INFO"
+					message="[{#[correlationID]} MEMBER-INQUIRY Response = #[payload]]"
+					doc:name="Logger" />
+			</when>
+			<otherwise>
+				<logger level="INFO"
+					message="[{#[correlationID]} : MEMBER-REGISTER Request = #[originalPayload]]"
+					doc:name="Logger" />
+				<flow-ref name="memberRegisterValidationFlow" doc:name="Flow Reference" />
+				<logger level="INFO"
+					message="[{#[correlationID]} MEMBER-REGISTER Response = #[payload]]"
+					doc:name="Logger" />
+			</otherwise>
+		</choice>
+		<exception-strategy ref="sessionException"
+			doc:name="Reference Exception Strategy" />
+	</flow>
+
+	<flow name="memberRegisterReqFlow">
+		<http:listener config-ref="HTTP_Listener_Configuration"
+			path="Member/RegisterRequest" allowedMethods="POST" doc:name="HTTP">
+		</http:listener>
+		<message-filter doc:name="Filter favicon">
+			<not-filter>
+				<wildcard-filter pattern="/favicon.ico"
+					caseSensitive="true" />
+			</not-filter>
+		</message-filter>
+		<custom-transformer class="org.equinox.api.data.MessageTransformer"
+			doc:name="Java" />
+		<set-variable value="#[message.inboundProperties.'http.method']"
+			variableName="method" doc:name="Variable" />
+		<set-variable value="#[message.id]" variableName="correlationID"
+			doc:name="Variable" />
+		<set-variable variableName="originalPayload" value="#[payload]"
+			doc:name="Variable" />
+		<expression-transformer
+			expression="#[originalPayload['transactionType']=org.apache.commons.lang.StringUtils.substringAfterLast(message.inboundProperties.'http.relative.path', '/');originalPayload]"
+			doc:name="Expression" />
+		<logger level="INFO"
+			message="[{#[correlationID]} : MEMBER-REGISTER-REQ Request = #[originalPayload]]"
+			doc:name="Logger" />
+		<flow-ref name="memberRegisterReqValidationFlow" doc:name="Flow Reference" />
+		<logger level="INFO"
+			message="[{#[correlationID]} MEMBER-REGISTER-REQ Response = #[payload]]"
+			doc:name="Logger" />
+		<exception-strategy ref="sessionException"
+			doc:name="Reference Exception Strategy" />
+	</flow>
+
+</mule>

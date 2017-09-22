@@ -1,16 +1,22 @@
 package org.equinox.api.data;
 
-public class ExternalMembers {
+import java.io.Serializable;
 
-	private String parentID;
+public class ExternalMembers implements Serializable {
+
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 7404452719444389518L;
+	private Integer parentID;
 	private String externalID;
 	private String description;
 
-	public String getParentID() {
+	public Integer getParentID() {
 		return parentID;
 	}
 
-	public void setParentID(String parentID) {
+	public void setParentID(Integer parentID) {
 		this.parentID = parentID;
 	}
 
@@ -28,11 +34,6 @@ public class ExternalMembers {
 
 	public void setDescription(String description) {
 		this.description = description;
-	}
-
-	@Override
-	public String toString() {
-		return "[parentID : " + parentID + ", externalID : " + externalID + ", description : " + description + "]";
 	}
 
 }

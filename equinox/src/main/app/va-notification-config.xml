@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:scripting="http://www.mulesoft.org/schema/mule/scripting"
+	xmlns:jms="http://www.mulesoft.org/schema/mule/jms" xmlns:tls="http://www.mulesoft.org/schema/mule/tls"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:tracking="http://www.mulesoft.org/schema/mule/ee/tracking"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:spring="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:mule-ss="http://www.mulesoft.org/schema/mule/spring-security"
+	xmlns:ss="http://www.springframework.org/schema/security"
+	xsi:schemaLocation="http://www.mulesoft.org/schema/mule/scripting http://www.mulesoft.org/schema/mule/scripting/current/mule-scripting.xsd
+http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-current.xsd
+http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/ee/tracking http://www.mulesoft.org/schema/mule/ee/tracking/current/mule-tracking-ee.xsd
+http://www.mulesoft.org/schema/mule/spring-security http://www.mulesoft.org/schema/mule/spring-security/3.1/mule-spring-security.xsd
+http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security-3.0.xsd
+http://www.mulesoft.org/schema/mule/tls http://www.mulesoft.org/schema/mule/tls/current/mule-tls.xsd
+http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+http://www.mulesoft.org/schema/mule/https http://www.mulesoft.org/schema/mule/https/current/mule-https.xsd
+http://www.mulesoft.org/schema/mule/jms http://www.mulesoft.org/schema/mule/jms/current/mule-jms.xsd">
+
+	<flow name="vaNotificationConfigFlow">
+		<jms:inbound-endpoint connector-ref="Active_MQ"
+			queue="va.notification" doc:name="JMS" />
+		<set-variable variableName="url"
+			value="#[new URL(payload['callbackURL']);]" doc:name="Variable" />
+
+		<set-variable variableName="protocol" value="#[url.getProtocol();]"
+			doc:name="Variable" />
+		<set-variable variableName="host" value="#[url.getHost();]"
+			doc:name="Variable" />
+		<set-variable value="#[port = (url.getPort() == -1) ? 80 : url.getPort()]"
+			variableName="port" doc:name="Variable" />
+		<set-variable
+			value="#[path = (url.getPath() == null) ? '/' : url.getPath()]"
+			variableName="path" doc:name="Variable" />
+
+		<choice doc:name="Choice">
+			<when expression="#[flowVars.protocol == 'http']">
+				<logger level="INFO"
+					message="[SENDING VA HTTP Notification: {#[message.id]} = #[payload]]"
+					doc:name="Logger" />
+				<until-successful objectStore-ref="objectStore"
+					deadLetterQueue-ref="vaDLQConfigFlow" failureExpression="#[header:INBOUND:http.status != 200]"
+					maxRetries="6" secondsBetweenRetries="6" doc:name="Until Successful">
+					<http:request config-ref="HTTP_VARequest_Configuration"
+						responseTimeout="120000" path="#[flowVars['path']]" method="POST"
+						doc:name="HTTP" />
+				</until-successful>
+			</when>
+			<otherwise>
+				<logger level="INFO"
+					message="[SENDING VA HTTPS Notification: : {#[message.id]} = #[payload]]"
+					doc:name="Logger" />
+				<until-successful objectStore-ref="objectStore"
+					deadLetterQueue-ref="vaDLQConfigFlow" failureExpression="#[header:INBOUND:http.status != 200]"
+					maxRetries="6" secondsBetweenRetries="6" doc:name="Until Successful">
+					<http:request config-ref="HTTPS_VARequest_Configuration"
+						responseTimeout="120000" path="#[flowVars['path']]" method="POST"
+						doc:name="HTTP" />
+				</until-successful>
+			</otherwise>
+		</choice>
+	</flow>
+
+</mule>

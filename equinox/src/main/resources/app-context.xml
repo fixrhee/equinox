@@ -23,5 +23,11 @@ http://www.springframework.org/schema/tx http://www.springframework.org/schema/t
 	</bean>
 
 	<bean id="HashValidation" class="org.equinox.api.auth.HashValidation" />
+	<bean id="Configurator" class="org.equinox.api.process.Configurator" />
+
+	<bean id="RegisterRequest" class="org.equinox.api.process.RegisterRequestProcessor">
+		<property name="instance" ref="Instance" />
+		<property name="configurator" ref="Configurator" />
+	</bean>
 
 </beans>

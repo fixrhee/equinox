@@ -1,7 +1,11 @@
 /Volumes/Data/git/equinox/equinox/src/main/java/org/equinox/api/auth/JWTDecoder.java
 /Volumes/Data/git/equinox/equinox/src/main/java/org/equinox/api/data/Status.java
+/Volumes/Data/git/equinox/equinox/src/main/java/org/equinox/api/data/MessageTransformer.java
 /Volumes/Data/git/equinox/equinox/src/main/java/org/equinox/api/auth/JWTValidation.java
+/Volumes/Data/git/equinox/equinox/src/main/java/org/equinox/api/process/Utils.java
+/Volumes/Data/git/equinox/equinox/src/main/java/org/equinox/api/auth/HashValidation.java
+/Volumes/Data/git/equinox/equinox/src/main/java/org/equinox/api/process/RegisterRequestProcessor.java
+/Volumes/Data/git/equinox/equinox/src/main/java/org/equinox/api/process/Configurator.java
 /Volumes/Data/git/equinox/equinox/src/main/java/org/equinox/api/auth/JWTProcessor.java
-/Volumes/Data/git/equinox/equinox/src/main/java/org/equinox/api/data/SessionResponse.java
 /Volumes/Data/git/equinox/equinox/src/main/java/org/equinox/api/data/ResponseStatus.java
 /Volumes/Data/git/equinox/equinox/src/main/java/org/equinox/api/data/StatusBuilder.java
