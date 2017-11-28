@@ -39,6 +39,8 @@ public abstract class StatusBuilder {
 			return new ResponseStatus("M14", "MEMBER_ALREADY_REGISTERED", "Member already registered on system");
 		case DESTINATION_MEMBER_NOT_FOUND:
 			return new ResponseStatus("M15", "DESTINATION_MEMBER_NOT_FOUND", "Destination member not found on system");
+		case NO_TRANSACTION:
+			return new ResponseStatus("S84", "NO_TRANSACTION", "No transaction found for the specified account");
 		case INVALID_ACCOUNT:
 			return new ResponseStatus("S14", "INVALID_ACCOUNT", "Invalid source account/permission not allowed");
 		case INVALID_FEE_ACCOUNT:
@@ -68,6 +70,9 @@ public abstract class StatusBuilder {
 					"Transaction amount is above the threshold limit");
 		case DUPLICATE_TRANSACTION:
 			return new ResponseStatus("P16", "DUPLICATE_TRANSACTION", "Duplicate transaction entry");
+		case TRANSACTION_BLOCKED:
+			return new ResponseStatus("T40", "TRANSACTION_BLOCKED",
+					"Transaction is blocked, please contact administrator");
 		case INVALID_PARAMETER:
 			return new ResponseStatus("P14", "INVALID_PARAMETER", "Invalid request parameter");
 		case SESSION_EXPIRED:
@@ -79,6 +84,8 @@ public abstract class StatusBuilder {
 		case PAYMENT_CODE_NOT_FOUND:
 			return new ResponseStatus("V14", "PAYMENT_CODE_NOT_FOUND",
 					"The specified Payment Code already expired or not found");
+		case INVALID_OTP:
+			return new ResponseStatus("C14", "INVALID_OTP", "OTP already expired or not found");
 		default:
 			return new ResponseStatus("E99", "UNKNOWN_ERROR", "Unknown Error");
 		}

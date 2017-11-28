@@ -16,6 +16,9 @@ http://www.mulesoft.org/schema/mule/vm http://www.mulesoft.org/schema/mule/vm/cu
 	<flow name="memberRegisterRequestConfigFlow">
 		<set-variable variableName="token" value="${api.ws.header.token}"
 			doc:name="Variable" />
+		<set-variable
+			value="0#[org.apache.commons.lang.StringUtils.substring(originalPayload['msisdn'], 2)]"
+			variableName="username" doc:name="Variable" />
 		<expression-component doc:name="Expression">
 		<![CDATA[
 			msg='<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:ser="http://services.bellatrix.org/">
@@ -26,7 +29,7 @@ http://www.mulesoft.org/schema/mule/vm http://www.mulesoft.org/schema/mule/vm/cu
 			   </soapenv:Header>
 			   <soapenv:Body>
 			      <ser:loadMembersByUsername>
-			         <username>' + originalPayload['msisdn'] + '</username>
+			         <username>' + flowVars['username'] + '</username>
 			      </ser:loadMembersByUsername>
 			   </soapenv:Body>
 			</soapenv:Envelope>';
@@ -57,13 +60,40 @@ http://www.mulesoft.org/schema/mule/vm http://www.mulesoft.org/schema/mule/vm/cu
 				</expression-component>
 			</when>
 			<otherwise>
+				<set-variable value="#[java.util.UUID.randomUUID().toString()]"
+					variableName="ticketID" doc:name="Variable" />
+				<set-variable
+					value="#[org.equinox.api.process.Utils.getRandomNumberInRange(999999)]"
+					variableName="otpnonpad" doc:name="Variable" />
+				<set-variable
+					value="#[org.apache.commons.lang.StringUtils.leftPad(otpnonpad,6,'0')]"
+					variableName="otp" doc:name="Variable" />
+				<expression-component doc:name="Expression">
+					<![CDATA[
+					cacheMap = new java.util.HashMap();
+					cacheMap['otp']= flowVars['otp'];			
+					cacheMap['msisdn']= originalPayload['msisdn'];
+					payload = cacheMap;]]>
+				</expression-component>
+				<vm:outbound-endpoint exchange-pattern="one-way"
+					connector-ref="Notification_VM" path="register.request.notification"
+					doc:name="VM" />
+				<expression-component doc:name="Expression">
+					<![CDATA[
+					regMap = new java.util.HashMap();
+					regMap['methodType']= 'PUT';			
+					regMap['name']= 'RegisterRequestMap';
+					regMap['key']= ticketID;
+					regMap['value']= payload;
+					payload = regMap;]]>
+				</expression-component>
 				<pooled-component>
-					<spring-object bean="RegisterRequest" />
+					<spring-object bean="CacheProcessor" />
 				</pooled-component>
 				<expression-component doc:name="Expression">
 					<![CDATA[
 					responseMap = new java.util.LinkedHashMap();
-					responseMap['ticketID']= payload;
+					responseMap['ticketID']= flowVars['ticketID'] + ':' + flowVars['otp'];
 					responseList = new java.util.LinkedList();
 					responseList = [responseMap];
 					regMap = new java.util.HashMap();
@@ -74,12 +104,6 @@ http://www.mulesoft.org/schema/mule/vm http://www.mulesoft.org/schema/mule/vm/cu
 			</otherwise>
 		</choice>
 		<flow-ref name="responseHandlerFlow" doc:name="Flow Reference" />
-	</flow>
-
-	<flow name="memberRegisterRequestNotificationConfigFlow">
-		<vm:inbound-endpoint exchange-pattern="one-way"
-			connector-ref="Notification_VM" path="notification" doc:name="VM" />
-		<logger level="INFO" />
 	</flow>
 
 </mule>

@@ -25,9 +25,8 @@ http://www.springframework.org/schema/tx http://www.springframework.org/schema/t
 	<bean id="HashValidation" class="org.equinox.api.auth.HashValidation" />
 	<bean id="Configurator" class="org.equinox.api.process.Configurator" />
 
-	<bean id="RegisterRequest" class="org.equinox.api.process.RegisterRequestProcessor">
+	<bean id="CacheProcessor" class="org.equinox.api.process.CacheProcessor">
 		<property name="instance" ref="Instance" />
-		<property name="configurator" ref="Configurator" />
 	</bean>
 
 </beans>

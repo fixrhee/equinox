@@ -1,17 +1,23 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<mule xmlns:vm="http://www.mulesoft.org/schema/mule/vm" xmlns:ws="http://www.mulesoft.org/schema/mule/ws"
-	xmlns:json="http://www.mulesoft.org/schema/mule/json" xmlns:http="http://www.mulesoft.org/schema/mule/http"
-	xmlns:jms="http://www.mulesoft.org/schema/mule/jms" xmlns="http://www.mulesoft.org/schema/mule/core"
-	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+<mule xmlns:udp="http://www.mulesoft.org/schema/mule/udp"
+	xmlns:tls="http://www.mulesoft.org/schema/mule/tls" xmlns:https="http://www.mulesoft.org/schema/mule/https"
+	xmlns:tcp="http://www.mulesoft.org/schema/mule/tcp" xmlns:vm="http://www.mulesoft.org/schema/mule/vm"
+	xmlns:ws="http://www.mulesoft.org/schema/mule/ws" xmlns:json="http://www.mulesoft.org/schema/mule/json"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:jms="http://www.mulesoft.org/schema/mule/jms"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
 	xmlns:spring="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://www.mulesoft.org/schema/mule/json http://www.mulesoft.org/schema/mule/json/current/mule-json.xsd
+	xsi:schemaLocation="http://www.mulesoft.org/schema/mule/https http://www.mulesoft.org/schema/mule/https/current/mule-https.xsd
+http://www.mulesoft.org/schema/mule/tcp http://www.mulesoft.org/schema/mule/tcp/current/mule-tcp.xsd
+http://www.mulesoft.org/schema/mule/json http://www.mulesoft.org/schema/mule/json/current/mule-json.xsd
 http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-current.xsd
 http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
 http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
 http://www.mulesoft.org/schema/mule/jms http://www.mulesoft.org/schema/mule/jms/current/mule-jms.xsd
 http://www.mulesoft.org/schema/mule/ws http://www.mulesoft.org/schema/mule/ws/current/mule-ws.xsd
-http://www.mulesoft.org/schema/mule/vm http://www.mulesoft.org/schema/mule/vm/current/mule-vm.xsd">
+http://www.mulesoft.org/schema/mule/vm http://www.mulesoft.org/schema/mule/vm/current/mule-vm.xsd
+http://www.mulesoft.org/schema/mule/tls http://www.mulesoft.org/schema/mule/tls/current/mule-tls.xsd
+http://www.mulesoft.org/schema/mule/udp http://www.mulesoft.org/schema/mule/udp/current/mule-udp.xsd">
 
 	<spring:beans>
 		<spring:import resource="classpath:app-context.xml" />
@@ -25,6 +31,12 @@ http://www.mulesoft.org/schema/mule/vm http://www.mulesoft.org/schema/mule/vm/cu
 		disableTemporaryReplyToDestinations="true" validateConnections="true"
 		doc:name="Active MQ" />
 
+	<http:listener-config name="HTTP_Admin_Listener_Configuration"
+		host="0.0.0.0" port="8877" basePath="Admin" doc:name="HTTP Listener Configuration" />
+
+	<http:listener-config name="HTTP_Credential_Listener_Configuration"
+		host="0.0.0.0" port="8672" basePath="Credential" doc:name="HTTP Listener Configuration" />
+
 	<http:listener-config name="HTTP_Listener_Configuration"
 		host="0.0.0.0" port="8670" basePath="Host/Optima" doc:name="HTTP Listener Configuration" />
 
@@ -32,18 +44,20 @@ http://www.mulesoft.org/schema/mule/vm http://www.mulesoft.org/schema/mule/vm/cu
 		host="localhost" port="8081" basePath="bellatrix/host/services/ws"
 		doc:name="HTTP Request Configuration" />
 
-	<http:request-config name="HTTP_VARequest_Configuration"
-		host="#[flowVars.host]" port="#[flowVars.port]" basePath="/"
-		doc:name="HTTP Request Configuration" />
-
-	<http:request-config name="HTTPS_VARequest_Configuration"
-		host="#[flowVars.host]" port="#[flowVars.port]" basePath="/"
-		doc:name="HTTPS Request Configuration" protocol="HTTPS" />
+	<http:request-config name="HTTP_TYK_Request_Configuration"
+		host="localhost" port="3000" basePath="tyk" doc:name="HTTP TYK Request Configuration" />
 
 	<vm:connector name="Notification_VM" validateConnections="true"
 		doc:name="VM" />
 	<vm:endpoint exchange-pattern="one-way" path="notification"
 		connector-ref="Notification_VM" name="NotificationVM" doc:name="VM" />
+
+	<vm:connector name="GrayLog_VM" validateConnections="true"
+		doc:name="VM" />
+
+	<udp:connector name="GrayLogUDP" validateConnections="true"
+		keepSendSocketOpen="true" doc:name="UDP" />
+
 
 	<spring:beans>
 		<spring:bean id="Bean" name="NonNullMapper"
@@ -54,5 +68,8 @@ http://www.mulesoft.org/schema/mule/vm http://www.mulesoft.org/schema/mule/vm/cu
 			</spring:property>
 		</spring:bean>
 	</spring:beans>
+	<tls:context name="TLS_Context" doc:name="TLS Context">
+		<tls:trust-store type="jks" insecure="true" />
+	</tls:context>
 
 </mule>

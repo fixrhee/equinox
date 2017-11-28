@@ -40,17 +40,131 @@ http://www.mulesoft.org/schema/mule/jms http://www.mulesoft.org/schema/mule/jms/
 		</http:request>
 		<byte-array-to-string-transformer
 			doc:name="Byte Array to String" />
+		<set-variable value="#[payload]" variableName="loginPayload"
+			doc:name="Variable" />
 		<set-variable value="#[xpath3('//status/message')]"
 			variableName="status" doc:name="Variable" />
-		<set-variable value="[#[xpath3('//members/groupID')]]"
+		<set-variable value="#[xpath3('//members/groupID')]"
 			variableName="groupID" doc:name="Variable" />
-		<set-variable value="${api.allowed.group.id}"
-			variableName="listAllowedGroupID" doc:name="Variable" />
 		<choice doc:name="Choice">
 			<when expression="#[flowVars['status'] == 'PROCESSED']">
+				<set-variable variableName="globalPayload" value="#[new java.util.HashMap()]"
+					doc:name="Variable" />
+				<expression-component doc:name="Expression">
+					<![CDATA[
+					regMap = new java.util.HashMap();
+					regMap['methodType']= 'GET';			
+					regMap['name']= 'GlobalConfigMap';
+					regMap['key']= 'global';
+					payload = regMap;]]>
+				</expression-component>
+				<pooled-component>
+					<spring-object bean="CacheProcessor" />
+				</pooled-component>
+				<choice>
+					<when expression="#[payload == null]">
+						<expression-component doc:name="Expression">
+						<![CDATA[
+						msg='<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:ser="http://services.bellatrix.org/">
+							   <soapenv:Header>
+							      <ser:headerAuth>
+							         <token>' + flowVars['token'] + '</token>
+							      </ser:headerAuth>
+							   </soapenv:Header>
+							   <soapenv:Body/>
+							</soapenv:Envelope>';
+						payload = msg;]]>
+						</expression-component>
+						<set-payload
+							value="#[org.apache.commons.codec.binary.StringUtils.newStringUtf8(payload.getBytes())]" />
+						<http:request config-ref="HTTP_Request_Configuration"
+							path="globalconfig" method="POST" doc:name="HTTP">
+							<http:request-builder>
+								<http:header headerName="soapaction"
+									value="&quot;loadGlobalConfig&quot;" />
+							</http:request-builder>
+						</http:request>
+						<byte-array-to-string-transformer
+							doc:name="Byte Array to String" />
+						<foreach collection="#[xpath3('//globalConfig', payload, 'NODESET')]"
+							doc:name="For Each">
+							<set-variable variableName="tempHeader"
+								value="#[xpath3('//globalConfig' + [counter] + '/internalName')]"
+								doc:name="Variable" />
+							<set-variable variableName="tempValue"
+								value="#[xpath3('//globalConfig' + [counter] + '/value')]"
+								doc:name="Variable" />
+							<expression-transformer
+								expression="#[globalPayload[tempHeader]=tempValue;globalPayload]"
+								doc:name="Expression" />
+						</foreach>
+						<expression-transformer
+							expression="#[originalPayload['globalConfig']=globalPayload;originalPayload]"
+							doc:name="Expression" />
+						<expression-component doc:name="Expression">
+							<![CDATA[
+							regMap = new java.util.HashMap();
+							regMap['methodType']= 'PUT';			
+							regMap['name']= 'GlobalConfigMap';
+							regMap['key']= 'global';
+							regMap['value']= globalPayload;
+							payload = regMap;]]>
+						</expression-component>
+						<pooled-component>
+							<spring-object bean="CacheProcessor" />
+						</pooled-component>
+						<expression-transformer
+							expression="#[originalPayload['globalConfig']=globalPayload;originalPayload]"
+							doc:name="Expression" />
+					</when>
+					<otherwise>
+						<expression-transformer
+							expression="#[originalPayload['globalConfig']=payload;originalPayload]"
+							doc:name="Expression" />
+						<logger level="INFO" message="[USING Cached Global Config]" />
+					</otherwise>
+				</choice>
+				<set-variable
+					value="#[originalPayload.globalConfig['partner.secret.auth.access.type.id']]"
+					variableName="accessTypeID" doc:name="Variable" />
+				<set-variable
+					value="#[originalPayload.globalConfig['api.allowed.group.id']]"
+					variableName="listAllowedGroupID" doc:name="Variable" />
+				<expression-component doc:name="Expression">
+					<![CDATA[
+						msg='<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:ser="http://services.bellatrix.org/">
+							   <soapenv:Header>
+							      <ser:headerAuth>
+							         <token>' + flowVars['token'] + '</token>
+							      </ser:headerAuth>
+							   </soapenv:Header>
+							   <soapenv:Body>
+							      <ser:getCredential>
+							         <accessTypeID>' + flowVars['accessTypeID'] + '</accessTypeID>
+							         <username>' + originalPayload['username'] + '</username>
+							      </ser:getCredential>
+							   </soapenv:Body>
+							</soapenv:Envelope>';
+						payload = msg;]]>
+				</expression-component>
+				<set-payload
+					value="#[org.apache.commons.codec.binary.StringUtils.newStringUtf8(payload.getBytes())]" />
+				<http:request config-ref="HTTP_Request_Configuration"
+					path="access" method="POST" doc:name="HTTP">
+					<http:request-builder>
+						<http:header headerName="soapaction" value="&quot;getCredential&quot;" />
+					</http:request-builder>
+				</http:request>
+				<byte-array-to-string-transformer
+					doc:name="Byte Array to String" />
+				<set-variable value="#[xpath3('//credential')]"
+					variableName="auth_secret" doc:name="Variable" />
+				<set-variable value="#[xpath3('//validate')]"
+					variableName="validateHash" doc:name="Variable" />
+				<set-payload value="#[loginPayload]" />
 				<choice doc:name="Choice">
 					<when
-						expression="#[org.apache.commons.lang.StringUtils.contains(listAllowedGroupID, groupID)]">
+						expression="#[org.apache.commons.lang.StringUtils.contains(listAllowedGroupID, '[' + groupID + ']')]">
 						<foreach collection="#[xpath3('//customFields', payload, 'NODESET')]"
 							doc:name="For Each">
 							<set-variable variableName="tempHeader"
@@ -64,7 +178,13 @@ http://www.mulesoft.org/schema/mule/jms http://www.mulesoft.org/schema/mule/jms/
 								doc:name="Expression" />
 						</foreach>
 						<choice doc:name="Choice">
-							<when expression="#[originalPayload['auth_secret'] != null]">
+							<when expression="#[org.mule.util.StringUtils.isNotEmpty(auth_secret)]">
+								<expression-transformer
+									expression="#[originalPayload['auth_secret']=flowVars['auth_secret'];originalPayload]"
+									doc:name="Expression" />
+								<expression-transformer
+									expression="#[originalPayload['validateHash']=validateHash;originalPayload]"
+									doc:name="Expression" />
 								<set-payload value="ALLOWED" doc:name="Set Payload" />
 								<logger level="INFO"
 									message="[VALIDATION : USER #[originalPayload['username']] ALLOWED To LOGIN]" />
@@ -155,13 +275,138 @@ http://www.mulesoft.org/schema/mule/jms http://www.mulesoft.org/schema/mule/jms/
 				<expression-transformer
 					expression="#[originalPayload['parentUsername']=flowVars['parentUsername'];originalPayload]"
 					doc:name="Expression" />
-				<set-payload value="#[originalPayload]" doc:name="Set Payload" />
+				<set-variable variableName="globalPayload" value="#[new java.util.HashMap()]"
+					doc:name="Variable" />
+				<expression-component doc:name="Expression">
+					<![CDATA[
+					regMap = new java.util.HashMap();
+					regMap['methodType']= 'GET';			
+					regMap['name']= 'GlobalConfigMap';
+					regMap['key']= 'global';
+					payload = regMap;]]>
+				</expression-component>
 				<pooled-component>
-					<spring-object bean="JWTValidation" />
+					<spring-object bean="CacheProcessor" />
 				</pooled-component>
-				<set-payload value="ALLOWED" doc:name="Set Payload" />
-				<logger level="INFO"
-					message="[VALIDATION : TOKEN Validation (#[originalPayload['parentUsername']]) SUCCESS]" />
+				<choice>
+					<when expression="#[payload == null]">
+						<expression-component doc:name="Expression">
+						<![CDATA[
+						msg='<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:ser="http://services.bellatrix.org/">
+							   <soapenv:Header>
+							      <ser:headerAuth>
+							         <token>' + flowVars['token'] + '</token>
+							      </ser:headerAuth>
+							   </soapenv:Header>
+							   <soapenv:Body/>
+							</soapenv:Envelope>';
+						payload = msg;]]>
+						</expression-component>
+						<set-payload
+							value="#[org.apache.commons.codec.binary.StringUtils.newStringUtf8(payload.getBytes())]" />
+						<http:request config-ref="HTTP_Request_Configuration"
+							path="globalconfig" method="POST" doc:name="HTTP">
+							<http:request-builder>
+								<http:header headerName="soapaction"
+									value="&quot;loadGlobalConfig&quot;" />
+							</http:request-builder>
+						</http:request>
+						<byte-array-to-string-transformer
+							doc:name="Byte Array to String" />
+						<foreach collection="#[xpath3('//globalConfig', payload, 'NODESET')]"
+							doc:name="For Each">
+							<set-variable variableName="tempHeader"
+								value="#[xpath3('//globalConfig' + [counter] + '/internalName')]"
+								doc:name="Variable" />
+							<set-variable variableName="tempValue"
+								value="#[xpath3('//globalConfig' + [counter] + '/value')]"
+								doc:name="Variable" />
+							<expression-transformer
+								expression="#[globalPayload[tempHeader]=tempValue;globalPayload]"
+								doc:name="Expression" />
+						</foreach>
+						<expression-transformer
+							expression="#[originalPayload['globalConfig']=globalPayload;originalPayload]"
+							doc:name="Expression" />
+						<expression-component doc:name="Expression">
+							<![CDATA[
+							regMap = new java.util.HashMap();
+							regMap['methodType']= 'PUT';			
+							regMap['name']= 'GlobalConfigMap';
+							regMap['key']= 'global';
+							regMap['value']= globalPayload;
+							payload = regMap;]]>
+						</expression-component>
+						<pooled-component>
+							<spring-object bean="CacheProcessor" />
+						</pooled-component>
+						<expression-transformer
+							expression="#[originalPayload['globalConfig']=globalPayload;originalPayload]"
+							doc:name="Expression" />
+					</when>
+					<otherwise>
+						<expression-transformer
+							expression="#[originalPayload['globalConfig']=payload;originalPayload]"
+							doc:name="Expression" />
+						<logger level="INFO" message="[USING Cached Global Config]" />
+					</otherwise>
+				</choice>
+				<set-variable
+					value="#[originalPayload.globalConfig['partner.secret.auth.access.type.id']]"
+					variableName="secretAuthID" doc:name="Variable" />
+				<expression-component doc:name="Expression">
+					<![CDATA[
+						msg='<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:ser="http://services.bellatrix.org/">
+						   <soapenv:Header>
+						      <ser:headerAuth>
+						         <token>' + flowVars['token'] + '</token>
+						      </ser:headerAuth>
+						   </soapenv:Header>
+						   <soapenv:Body>
+						      <ser:getCredential>
+						         <accessTypeID>' + flowVars['secretAuthID'] + '</accessTypeID>
+						         <username>' + originalPayload['parentUsername'] + '</username>
+						      </ser:getCredential>
+						   </soapenv:Body>
+						</soapenv:Envelope>';
+						payload = msg;]]>
+				</expression-component>
+				<set-payload
+					value="#[org.apache.commons.codec.binary.StringUtils.newStringUtf8(payload.getBytes())]" />
+				<http:request config-ref="HTTP_Request_Configuration"
+					path="access" method="POST" doc:name="HTTP">
+					<http:request-builder>
+						<http:header headerName="soapaction" value="&quot;getCredential&quot;" />
+					</http:request-builder>
+				</http:request>
+				<byte-array-to-string-transformer
+					doc:name="Byte Array to String" />
+				<set-variable value="#[xpath3('//status/message')]"
+					variableName="status" doc:name="Variable" />
+				<choice doc:name="Choice">
+					<when expression="#[flowVars['status'] == 'PROCESSED']">
+						<set-variable value="#[xpath3('//credential')]"
+							variableName="authSecret" doc:name="Variable" />
+						<set-variable value="#[xpath3('//validate')]"
+							variableName="validateHash" doc:name="Variable" />
+						<expression-transformer
+							expression="#[originalPayload['auth_secret']=flowVars['authSecret'];originalPayload]"
+							doc:name="Expression" />
+						<expression-transformer
+							expression="#[originalPayload['validateHash']=flowVars['validateHash'];originalPayload]"
+							doc:name="Expression" />
+						<set-payload value="#[originalPayload]" doc:name="Set Payload" />
+						<pooled-component>
+							<spring-object bean="JWTValidation" />
+						</pooled-component>
+						<set-payload value="ALLOWED" doc:name="Set Payload" />
+						<logger level="INFO"
+							message="[VALIDATION : TOKEN Validation (#[originalPayload['parentUsername']]) SUCCESS]" />
+					</when>
+					<otherwise>
+						<set-payload value="#[flowVars['status']]" doc:name="Set Payload" />
+					</otherwise>
+				</choice>
 			</when>
 			<otherwise>
 				<set-payload value="#[flowVars['status']]" doc:name="Set Payload" />
@@ -217,6 +462,10 @@ http://www.mulesoft.org/schema/mule/jms http://www.mulesoft.org/schema/mule/jms/
 			variableName="status" doc:name="Variable" />
 		<choice doc:name="Choice">
 			<when expression="#[flowVars['status'] == 'PROCESSED']">
+				<set-variable value="#[xpath3('//members/groupID')]"
+					variableName="fromGroupID" doc:name="Variable" />
+				<set-variable value="#[xpath3('//members/email')]"
+					variableName="fromEmail" doc:name="Variable" />
 				<foreach collection="#[xpath3('//customFields', payload, 'NODESET')]"
 					doc:name="For Each">
 					<set-variable variableName="tempHeader"
@@ -235,7 +484,7 @@ http://www.mulesoft.org/schema/mule/jms http://www.mulesoft.org/schema/mule/jms/
 
 				<choice doc:name="Choice">
 					<when
-						expression="#[originalPayload['parentUsername'] != originalPayload['msisdn']]">
+						expression="#[originalPayload['parentUsername'] != originalPayload['fromMember']]">
 
 						<foreach collection="#[xpath3('//externalMembers', payload, 'NODESET')]"
 							doc:name="For Each">
@@ -245,14 +494,14 @@ http://www.mulesoft.org/schema/mule/jms http://www.mulesoft.org/schema/mule/jms/
 							<set-variable variableName="externalID"
 								value="#[xpath3('//externalMembers' + [counter] + '/externalID')]"
 								doc:name="Variable" />
-							<set-variable variableName="description"
+							<set-variable variableName="externalDescription"
 								value="#[xpath3('//externalMembers' + [counter] + '/description')]"
 								doc:name="Variable" />
 							<expression-component doc:name="Expression"> 
 								<![CDATA[ externalMembers = new org.equinox.api.data.ExternalMembers(); 
 								externalMembers.parentID = flowVars['pid']; 
 								externalMembers.externalID = flowVars['externalID']; 
-								externalMembers.description = flowVars['description']; 
+								externalMembers.description = flowVars['externalDescription']; 
 								payload = externalMembers;]]>
 							</expression-component>
 							<expression-transformer expression="#[externalMap[pid]=payload;externalMap]"

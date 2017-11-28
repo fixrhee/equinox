@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<mule xmlns:tls="http://www.mulesoft.org/schema/mule/tls"
+<mule xmlns:vm="http://www.mulesoft.org/schema/mule/vm" xmlns:tls="http://www.mulesoft.org/schema/mule/tls"
 	xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:tracking="http://www.mulesoft.org/schema/mule/ee/tracking"
 	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
-	xmlns:spring="http://www.springframework.org/schema/beans" version="EE-3.6.0"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:mule-ss="http://www.mulesoft.org/schema/mule/spring-security"
+	xmlns:spring="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:mule-ss="http://www.mulesoft.org/schema/mule/spring-security"
 	xmlns:ss="http://www.springframework.org/schema/security"
 	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-current.xsd
 http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
@@ -14,7 +14,8 @@ http://www.mulesoft.org/schema/mule/spring-security http://www.mulesoft.org/sche
 http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security-3.0.xsd
 http://www.mulesoft.org/schema/mule/tls http://www.mulesoft.org/schema/mule/tls/current/mule-tls.xsd
 http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
-http://www.mulesoft.org/schema/mule/https http://www.mulesoft.org/schema/mule/https/current/mule-https.xsd">
+http://www.mulesoft.org/schema/mule/https http://www.mulesoft.org/schema/mule/https/current/mule-https.xsd
+http://www.mulesoft.org/schema/mule/vm http://www.mulesoft.org/schema/mule/vm/current/mule-vm.xsd">
 
 
 	<flow name="loginChannelFlow">
@@ -28,8 +29,9 @@ http://www.mulesoft.org/schema/mule/https http://www.mulesoft.org/schema/mule/ht
 		</message-filter>
 		<set-variable value="#[message.id]" variableName="correlationID"
 			doc:name="Variable" />
-		<set-payload value="#[message.inboundProperties.'Authorization']" />
-		<choice>
+		<set-payload value="#[message.inboundProperties.'Authorization']"
+			doc:name="Set Payload" />
+		<choice doc:name="Choice">
 			<when expression="#[payload == null]">
 				<expression-component doc:name="Expression">
 					<![CDATA[
@@ -37,13 +39,15 @@ http://www.mulesoft.org/schema/mule/https http://www.mulesoft.org/schema/mule/ht
 					responseMap['status']= org.equinox.api.data.StatusBuilder.getStatus('UNAUTHORIZED_ACCESS');			
 					payload = responseMap;]]>
 				</expression-component>
-				<flow-ref name="responseHandlerFlow" />
+				<flow-ref name="responseHandlerFlow" doc:name="Flow Reference" />
 			</when>
 			<otherwise>
 				<set-payload
-					value="#[message.payloadAs(java.lang.String).substring('Basic'.length()).trim()]" />
+					value="#[message.payloadAs(java.lang.String).substring('Basic'.length()).trim()]"
+					doc:name="Set Payload" />
 				<expression-transformer
-					expression="#[new String(org.mule.util.Base64.decode(payload),java.nio.charset.Charset.forName('UTF-8')).split(':');]" />
+					expression="#[new String(org.mule.util.Base64.decode(payload),java.nio.charset.Charset.forName('UTF-8')).split(':');]"
+					doc:name="Expression" />
 				<expression-component doc:name="Expression">
 					<![CDATA[
 					responseMap = new java.util.HashMap();
@@ -56,11 +60,20 @@ http://www.mulesoft.org/schema/mule/https http://www.mulesoft.org/schema/mule/ht
 				<expression-transformer
 					expression="#[originalPayload['transactionType']=org.apache.commons.lang.StringUtils.substringAfterLast(message.inboundProperties.'http.relative.path', '/');originalPayload]"
 					doc:name="Expression" />
+				<set-property value="Login" propertyName="type"
+					doc:name="Property" />
+				<vm:outbound-endpoint exchange-pattern="one-way"
+					path="log.request" connector-ref="GrayLog_VM" doc:name="VM" />
 				<logger level="INFO"
-					message="[#[correlationID] LOGIN Request : #[originalPayload]]" />
-				<flow-ref name="loginValidationFlow" />
+					message="[#[correlationID] LOGIN Request : #[originalPayload]]"
+					doc:name="Logger" />
+				<flow-ref name="loginValidationFlow" doc:name="Flow Reference" />
 				<logger level="INFO"
-					message="[#[correlationID] LOGIN Response : #[payload]]" />
+					message="[#[correlationID] LOGIN Response : #[payload]]" doc:name="Logger" />
+				<set-property value="Login" propertyName="type"
+					doc:name="Property" />
+				<vm:outbound-endpoint exchange-pattern="one-way"
+					path="log.response" connector-ref="GrayLog_VM" doc:name="VM" />
 			</otherwise>
 		</choice>
 	</flow>

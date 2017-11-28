@@ -1,10 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<mule xmlns:ws="http://www.mulesoft.org/schema/mule/ws" xmlns:json="http://www.mulesoft.org/schema/mule/json"
-	xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:jms="http://www.mulesoft.org/schema/mule/jms"
-	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+<mule xmlns:vm="http://www.mulesoft.org/schema/mule/vm" xmlns:ws="http://www.mulesoft.org/schema/mule/ws"
+	xmlns:json="http://www.mulesoft.org/schema/mule/json" xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns:jms="http://www.mulesoft.org/schema/mule/jms" xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
 	xmlns:spring="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-current.xsd
+	xsi:schemaLocation="
+http://www.mulesoft.org/schema/mule/vm http://www.mulesoft.org/schema/mule/vm/current/mule-vm.xsd http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-current.xsd
 http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
 http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
 http://www.mulesoft.org/schema/mule/jms http://www.mulesoft.org/schema/mule/jms/current/mule-jms.xsd
@@ -37,7 +39,15 @@ http://www.mulesoft.org/schema/mule/ws http://www.mulesoft.org/schema/mule/ws/cu
 				<logger level="INFO"
 					message="[{#[correlationID]} : MEMBER-INQUIRY Request = #[originalPayload]]"
 					doc:name="Logger" />
+				<set-property value="memberInquiry" propertyName="type"
+					doc:name="Property" />
+				<vm:outbound-endpoint exchange-pattern="one-way"
+					path="log.request" connector-ref="GrayLog_VM" doc:name="VM" />
 				<flow-ref name="memberInquiryValidationFlow" doc:name="Flow Reference" />
+				<set-property value="memberInquiry" propertyName="type"
+					doc:name="Property" />
+				<vm:outbound-endpoint exchange-pattern="one-way"
+					path="log.response" connector-ref="GrayLog_VM" doc:name="VM" />
 				<logger level="INFO"
 					message="[{#[correlationID]} MEMBER-INQUIRY Response = #[payload]]"
 					doc:name="Logger" />
@@ -46,7 +56,15 @@ http://www.mulesoft.org/schema/mule/ws http://www.mulesoft.org/schema/mule/ws/cu
 				<logger level="INFO"
 					message="[{#[correlationID]} : MEMBER-REGISTER Request = #[originalPayload]]"
 					doc:name="Logger" />
+				<set-property value="memberRegister" propertyName="type"
+					doc:name="Property" />
+				<vm:outbound-endpoint exchange-pattern="one-way"
+					path="log.request" connector-ref="GrayLog_VM" doc:name="VM" />
 				<flow-ref name="memberRegisterValidationFlow" doc:name="Flow Reference" />
+				<set-property value="memberRegister" propertyName="type"
+					doc:name="Property" />
+				<vm:outbound-endpoint exchange-pattern="one-way"
+					path="log.response" connector-ref="GrayLog_VM" doc:name="VM" />
 				<logger level="INFO"
 					message="[{#[correlationID]} MEMBER-REGISTER Response = #[payload]]"
 					doc:name="Logger" />
@@ -80,7 +98,15 @@ http://www.mulesoft.org/schema/mule/ws http://www.mulesoft.org/schema/mule/ws/cu
 		<logger level="INFO"
 			message="[{#[correlationID]} : MEMBER-REGISTER-REQ Request = #[originalPayload]]"
 			doc:name="Logger" />
+		<set-property value="memberRegisterRequest" propertyName="type"
+			doc:name="Property" />
+		<vm:outbound-endpoint exchange-pattern="one-way"
+			path="log.request" connector-ref="GrayLog_VM" doc:name="VM" />
 		<flow-ref name="memberRegisterReqValidationFlow" doc:name="Flow Reference" />
+		<set-property value="memberRegisterRequest" propertyName="type"
+			doc:name="Property" />
+		<vm:outbound-endpoint exchange-pattern="one-way"
+			path="log.response" connector-ref="GrayLog_VM" doc:name="VM" />
 		<logger level="INFO"
 			message="[{#[correlationID]} MEMBER-REGISTER-REQ Response = #[payload]]"
 			doc:name="Logger" />

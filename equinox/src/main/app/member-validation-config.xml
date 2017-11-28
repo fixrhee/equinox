@@ -20,20 +20,42 @@ http://www.mulesoft.org/schema/mule/ws http://www.mulesoft.org/schema/mule/ws/cu
 			</and-filter>
 		</message-filter>
 
-		<flow-ref name="tokenValidation" doc:name="Flow Reference"/>
+		<flow-ref name="tokenValidation" doc:name="Flow Reference" />
 		<message-filter onUnaccepted="requestValidationFlow"
 			doc:name="Message">
 			<expression-filter expression="#[payload == 'ALLOWED']" />
 		</message-filter>
 
-		<flow-ref name="accessValidation" doc:name="Flow Reference"/>
+		<flow-ref name="accessValidation" doc:name="Flow Reference" />
 		<message-filter onUnaccepted="requestValidationFlow"
 			doc:name="Message">
 			<expression-filter expression="#[payload == 'ALLOWED']" />
 		</message-filter>
 
-		<set-payload value="#[originalPayload]" doc:name="Set Payload"/>
-		<flow-ref name="memberInquiryConfigFlow" doc:name="Flow Reference"/>
+		<choice>
+			<when expression="#[originalPayload['validateHash'] == true]">
+				<choice>
+					<when
+						expression="#[org.mule.util.StringUtils.isNotEmpty(originalPayload.'requestAuth')]">
+						<flow-ref name="hashValidation" />
+						<message-filter onUnaccepted="requestValidationFlow"
+							doc:name="Message">
+							<expression-filter expression="#[payload == 'ALLOWED']" />
+						</message-filter>
+						<set-payload value="#[originalPayload]" />
+						<flow-ref name="memberInquiryConfigFlow" />
+					</when>
+					<otherwise>
+						<flow-ref name="invalidParameterFlow" />
+					</otherwise>
+				</choice>
+			</when>
+			<otherwise>
+				<logger level="DEBUG" message="[SKIP HASH Validation]" />
+				<set-payload value="#[originalPayload]" />
+				<flow-ref name="memberInquiryConfigFlow" />
+			</otherwise>
+		</choice>
 	</flow>
 
 	<flow name="memberRegisterValidationFlow">
@@ -42,28 +64,89 @@ http://www.mulesoft.org/schema/mule/ws http://www.mulesoft.org/schema/mule/ws/cu
 			<and-filter doc:name="And">
 				<expression-filter expression="#[originalPayload['name'] != null]" />
 				<expression-filter expression="#[originalPayload['email'] != null]" />
-				<expression-filter expression="#[originalPayload['credential'] != null]" />
 				<expression-filter expression="#[originalPayload['otp'] != null]" />
 				<expression-filter expression="#[originalPayload['ticketID'] != null]" />
 				<expression-filter expression="#[originalPayload['token'] != null]" />
 			</and-filter>
 		</message-filter>
 
-		<set-variable
-			value="#[GroupID = (originalPayload['groupID'] == null) ? ${api.member.default.group.id} : originalPayload['groupID']]"
-			variableName="GroupID" doc:name="Variable" />
-		<expression-transformer
-			expression="#[originalPayload['groupID']=flowVars['GroupID'];originalPayload]"
-			doc:name="Expression" />
-
-		<flow-ref name="tokenValidation" doc:name="Flow Reference"/>
+		<flow-ref name="tokenValidation" doc:name="Flow Reference" />
 		<message-filter onUnaccepted="requestValidationFlow"
 			doc:name="Message">
 			<expression-filter expression="#[payload == 'ALLOWED']" />
 		</message-filter>
 
-		<set-payload value="#[originalPayload]" doc:name="Set Payload"/>
-		<flow-ref name="memberRegisterConfigFlow" doc:name="Flow Reference"/>
+		<expression-component doc:name="Expression">
+			<![CDATA[
+			regMap = new java.util.HashMap();
+			regMap['methodType']= 'GET';			
+			regMap['name']= 'RegisterRequestMap';
+			regMap['key']= originalPayload['ticketID'];
+			payload = regMap;]]>
+		</expression-component>
+		<pooled-component>
+			<spring-object bean="CacheProcessor" />
+		</pooled-component>
+
+		<choice>
+			<when>
+				<and-filter>
+					<expression-filter expression="#[payload != null]" />
+					<expression-filter expression="#[payload['otp'] == originalPayload['otp']]" />
+				</and-filter>
+				<expression-transformer
+					expression="#[originalPayload['msisdn']=payload['msisdn'];originalPayload]"
+					doc:name="Expression" />
+				<set-payload value="ALLOWED" />
+			</when>
+			<otherwise>
+				<set-payload value="INVALID_OTP" />
+			</otherwise>
+		</choice>
+
+		<message-filter onUnaccepted="requestValidationFlow"
+			doc:name="Message">
+			<expression-filter expression="#[payload == 'ALLOWED']" />
+		</message-filter>
+
+		<set-variable
+			value="#[GroupID = (originalPayload['groupID'] == null) ? originalPayload.globalConfig['member.default.group.id'] : originalPayload['groupID']]"
+			variableName="GroupID" doc:name="Variable" />
+		<expression-transformer
+			expression="#[originalPayload['groupID']=flowVars['GroupID'];originalPayload]"
+			doc:name="Expression" />
+
+		<set-variable
+			value="#[GroupID = (originalPayload['extID'] == null) ? originalPayload['username'] : originalPayload['extID']]"
+			variableName="extID" doc:name="Variable" />
+		<expression-transformer
+			expression="#[originalPayload['extID']=flowVars['extID'];originalPayload]"
+			doc:name="Expression" />
+
+		<choice>
+			<when expression="#[originalPayload['validateHash'] == true]">
+				<choice>
+					<when
+						expression="#[org.mule.util.StringUtils.isNotEmpty(originalPayload.'requestAuth')]">
+						<flow-ref name="hashValidation" />
+						<message-filter onUnaccepted="requestValidationFlow"
+							doc:name="Message">
+							<expression-filter expression="#[payload == 'ALLOWED']" />
+						</message-filter>
+						<set-payload value="#[originalPayload]" />
+						<flow-ref name="memberRegisterConfigFlow" />
+					</when>
+					<otherwise>
+						<flow-ref name="invalidParameterFlow" />
+					</otherwise>
+				</choice>
+			</when>
+			<otherwise>
+				<logger level="DEBUG" message="[SKIP HASH Validation]" />
+				<set-payload value="#[originalPayload]" />
+				<flow-ref name="memberRegisterConfigFlow" />
+			</otherwise>
+		</choice>
 	</flow>
 
 	<flow name="memberRegisterReqValidationFlow">
@@ -75,14 +158,36 @@ http://www.mulesoft.org/schema/mule/ws http://www.mulesoft.org/schema/mule/ws/cu
 			</and-filter>
 		</message-filter>
 
-		<flow-ref name="tokenValidation" doc:name="Flow Reference"/>
+		<flow-ref name="tokenValidation" doc:name="Flow Reference" />
 		<message-filter onUnaccepted="requestValidationFlow"
 			doc:name="Message">
 			<expression-filter expression="#[payload == 'ALLOWED']" />
 		</message-filter>
 
-		<set-payload value="#[originalPayload]" doc:name="Set Payload"/>
-		<flow-ref name="memberRegisterRequestConfigFlow" doc:name="Flow Reference"/>
+		<choice>
+			<when expression="#[originalPayload['validateHash'] == true]">
+				<choice>
+					<when
+						expression="#[org.mule.util.StringUtils.isNotEmpty(originalPayload.'requestAuth')]">
+						<flow-ref name="hashValidation" />
+						<message-filter onUnaccepted="requestValidationFlow"
+							doc:name="Message">
+							<expression-filter expression="#[payload == 'ALLOWED']" />
+						</message-filter>
+						<set-payload value="#[originalPayload]" />
+						<flow-ref name="memberRegisterRequestConfigFlow" />
+					</when>
+					<otherwise>
+						<flow-ref name="invalidParameterFlow" />
+					</otherwise>
+				</choice>
+			</when>
+			<otherwise>
+				<logger level="DEBUG" message="[SKIP HASH Validation]" />
+				<set-payload value="#[originalPayload]" />
+				<flow-ref name="memberRegisterRequestConfigFlow" />
+			</otherwise>
+		</choice>
 	</flow>
 
 </mule>

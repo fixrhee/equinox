@@ -49,8 +49,6 @@ http://www.mulesoft.org/schema/mule/ws http://www.mulesoft.org/schema/mule/ws/cu
 
 		<foreach collection="#[xpath3('//transfers', forPayload, 'NODESET')]"
 			doc:name="For Each">
-			<set-variable variableName="lPayload" value="#[payload]"
-				doc:name="Variable" />
 			<set-variable variableName="trxPayload"
 				value="#[new java.util.LinkedHashMap()]" doc:name="Variable" />
 			<set-variable variableName="fromMemberFields" value="#[new java.util.HashMap()]"
@@ -144,16 +142,26 @@ http://www.mulesoft.org/schema/mule/ws http://www.mulesoft.org/schema/mule/ws/cu
 				<![CDATA[trxMaps.add(trxPayload);]]>
 			</expression-component>
 		</foreach>
-
-		<expression-component doc:name="Expression">
-			<![CDATA[
-			responseMap = new java.util.HashMap();
-			responseMap['status']= org.equinox.api.data.StatusBuilder.getStatus('PROCESSED');			
-			responseMap['TransactionHistoryResponse']=flowVars['trxMaps'];	
-			payload = responseMap;]]>
-		</expression-component>
+		<choice>
+			<when expression="#[xpath3('//status/message') == 'PROCESSED']">
+				<expression-component doc:name="Expression">
+					<![CDATA[
+					responseMap = new java.util.HashMap();
+					responseMap['status']= org.equinox.api.data.StatusBuilder.getStatus('PROCESSED');			
+					responseMap['TransactionHistoryResponse']=flowVars['trxMaps'];	
+					payload = responseMap;]]>
+				</expression-component>
+			</when>
+			<otherwise>
+				<expression-component doc:name="Expression">
+					<![CDATA[
+					responseMap = new java.util.HashMap();
+					responseMap['status']= org.equinox.api.data.StatusBuilder.getStatus('NO_TRANSACTION');			
+					payload = responseMap;]]>
+				</expression-component>
+			</otherwise>
+		</choice>
 		<flow-ref name="responseHandlerFlow" doc:name="Flow Reference" />
-
 	</flow>
 
 </mule>

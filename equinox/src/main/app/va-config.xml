@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<mule xmlns:tls="http://www.mulesoft.org/schema/mule/tls"
+<mule xmlns:vm="http://www.mulesoft.org/schema/mule/vm" xmlns:tls="http://www.mulesoft.org/schema/mule/tls"
 	xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:tracking="http://www.mulesoft.org/schema/mule/ee/tracking"
 	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
-	xmlns:spring="http://www.springframework.org/schema/beans" version="EE-3.6.0"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:mule-ss="http://www.mulesoft.org/schema/mule/spring-security"
+	xmlns:spring="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:mule-ss="http://www.mulesoft.org/schema/mule/spring-security"
 	xmlns:ss="http://www.springframework.org/schema/security"
 	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-current.xsd
 http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
@@ -14,7 +14,8 @@ http://www.mulesoft.org/schema/mule/spring-security http://www.mulesoft.org/sche
 http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security-3.0.xsd
 http://www.mulesoft.org/schema/mule/tls http://www.mulesoft.org/schema/mule/tls/current/mule-tls.xsd
 http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
-http://www.mulesoft.org/schema/mule/https http://www.mulesoft.org/schema/mule/https/current/mule-https.xsd">
+http://www.mulesoft.org/schema/mule/https http://www.mulesoft.org/schema/mule/https/current/mule-https.xsd
+http://www.mulesoft.org/schema/mule/vm http://www.mulesoft.org/schema/mule/vm/current/mule-vm.xsd">
 
 
 	<spring:beans>
@@ -34,17 +35,25 @@ http://www.mulesoft.org/schema/mule/https http://www.mulesoft.org/schema/mule/ht
 		<custom-transformer class="org.equinox.api.data.MessageTransformer"
 			doc:name="Java" />
 		<set-variable value="#[message.inboundProperties.'http.method']"
-			variableName="method" />
+			variableName="method" doc:name="Variable" />
 		<set-variable value="#[message.id]" variableName="correlationID"
 			doc:name="Variable" />
 		<set-variable value="#[payload]" variableName="originalPayload"
 			doc:name="Variable" />
-		<choice>
+		<choice doc:name="Choice">
 			<when expression="#[method == 'GET']">
 				<logger level="INFO"
 					message="[{#[correlationID]} : VA-RETRIEVE Request = #[originalPayload]]"
 					doc:name="Logger" />
-				<flow-ref name="vaRetrieveValidationFlow" />
+				<set-property value="VARetrieve" propertyName="type"
+					doc:name="Property" />
+				<vm:outbound-endpoint exchange-pattern="one-way"
+					path="log.request" connector-ref="GrayLog_VM" doc:name="VM" />
+				<flow-ref name="vaRetrieveValidationFlow" doc:name="Flow Reference" />
+				<set-property value="VARetrieve" propertyName="type"
+					doc:name="Property" />
+				<vm:outbound-endpoint exchange-pattern="one-way"
+					path="log.response" connector-ref="GrayLog_VM" doc:name="VM" />
 				<logger level="INFO"
 					message="[{#[correlationID]} : VA-RETRIEVE Response = #[payload]]"
 					doc:name="Logger" />
@@ -53,7 +62,15 @@ http://www.mulesoft.org/schema/mule/https http://www.mulesoft.org/schema/mule/ht
 				<logger level="INFO"
 					message="[{#[correlationID]} : VA-REGISTER Request = #[originalPayload]]"
 					doc:name="Logger" />
-				<flow-ref name="vaRequestValidationFlow" />
+				<set-property value="VARegister" propertyName="type"
+					doc:name="Property" />
+				<vm:outbound-endpoint exchange-pattern="one-way"
+					path="log.request" connector-ref="GrayLog_VM" doc:name="VM" />
+				<flow-ref name="vaRequestValidationFlow" doc:name="Flow Reference" />
+				<set-property value="VARegister" propertyName="type"
+					doc:name="Property" />
+				<vm:outbound-endpoint exchange-pattern="one-way"
+					path="log.response" connector-ref="GrayLog_VM" doc:name="VM" />
 				<logger level="INFO"
 					message="[{#[correlationID]} : VA-REGISTER Response = #[payload]]"
 					doc:name="Logger" />
@@ -65,7 +82,7 @@ http://www.mulesoft.org/schema/mule/https http://www.mulesoft.org/schema/mule/ht
 
 	<flow name="vaUpdateDeleteFlow">
 		<http:listener config-ref="HTTP_Listener_Configuration"
-			path="VirtualAccount/*" allowedMethods="POST,DELETE" doc:name="HTTP" />
+			path="VirtualAccount/*" allowedMethods="PUT,DELETE" doc:name="HTTP" />
 		<message-filter doc:name="Filter favicon">
 			<not-filter>
 				<wildcard-filter pattern="/favicon.ico"
@@ -75,7 +92,7 @@ http://www.mulesoft.org/schema/mule/https http://www.mulesoft.org/schema/mule/ht
 		<custom-transformer class="org.equinox.api.data.MessageTransformer"
 			doc:name="Java" />
 		<set-variable value="#[message.inboundProperties.'http.method']"
-			variableName="method" />
+			variableName="method" doc:name="Variable" />
 		<set-variable value="#[message.id]" variableName="correlationID"
 			doc:name="Variable" />
 		<set-variable value="#[payload]" variableName="originalPayload"
@@ -83,12 +100,20 @@ http://www.mulesoft.org/schema/mule/https http://www.mulesoft.org/schema/mule/ht
 		<expression-transformer
 			expression="#[originalPayload['paymentCode']=org.apache.commons.lang.StringUtils.substringAfterLast(message.inboundProperties.'http.relative.path', '/');originalPayload]"
 			doc:name="Expression" />
-		<choice>
-			<when expression="#[method == 'POST']">
+		<choice doc:name="Choice">
+			<when expression="#[method == 'PUT']">
 				<logger level="INFO"
 					message="[{#[correlationID]} : VA-UPDATE Request = #[originalPayload]]"
 					doc:name="Logger" />
-				<flow-ref name="vaUpdateValidationFlow" />
+				<set-property value="VAUpdate" propertyName="type"
+					doc:name="Property" />
+				<vm:outbound-endpoint exchange-pattern="one-way"
+					path="log.request" connector-ref="GrayLog_VM" doc:name="VM" />
+				<flow-ref name="vaUpdateValidationFlow" doc:name="Flow Reference" />
+				<set-property value="VAUpdate" propertyName="type"
+					doc:name="Property" />
+				<vm:outbound-endpoint exchange-pattern="one-way"
+					path="log.response" connector-ref="GrayLog_VM" doc:name="VM" />
 				<logger level="INFO"
 					message="[{#[correlationID]} : VA-UPDATE Response = #[payload]]"
 					doc:name="Logger" />
@@ -97,12 +122,48 @@ http://www.mulesoft.org/schema/mule/https http://www.mulesoft.org/schema/mule/ht
 				<logger level="INFO"
 					message="[{#[correlationID]} : VA-DELETE Request = #[originalPayload]]"
 					doc:name="Logger" />
-				<flow-ref name="vaDeleteValidationFlow" />
+				<set-property value="VADelete" propertyName="type"
+					doc:name="Property" />
+				<vm:outbound-endpoint exchange-pattern="one-way"
+					path="log.request" connector-ref="GrayLog_VM" doc:name="VM" />
+				<flow-ref name="vaDeleteValidationFlow" doc:name="Flow Reference" />
+				<set-property value="VADelete" propertyName="type"
+					doc:name="Property" />
+				<vm:outbound-endpoint exchange-pattern="one-way"
+					path="log.response" connector-ref="GrayLog_VM" doc:name="VM" />
 				<logger level="INFO"
 					message="[{#[correlationID]} : VA-DELETE Response = #[payload]]"
 					doc:name="Logger" />
 			</otherwise>
 		</choice>
+		<exception-strategy ref="sessionException"
+			doc:name="Reference Exception Strategy" />
+	</flow>
+
+	<flow name="vaGetListBankFlow">
+		<http:listener config-ref="HTTP_Listener_Configuration"
+			path="VirtualAccount/GetBankID" allowedMethods="GET" doc:name="HTTP" />
+		<message-filter doc:name="Filter favicon">
+			<not-filter>
+				<wildcard-filter pattern="/favicon.ico"
+					caseSensitive="true" />
+			</not-filter>
+		</message-filter>
+		<custom-transformer class="org.equinox.api.data.MessageTransformer"
+			doc:name="Java" />
+		<set-variable value="#[message.id]" variableName="correlationID"
+			doc:name="Variable" />
+		<set-variable value="#[payload]" variableName="originalPayload"
+			doc:name="Variable" />
+		<set-property value="VAGetBank" propertyName="type"
+			doc:name="Property" />
+		<vm:outbound-endpoint exchange-pattern="one-way"
+			path="log.request" connector-ref="GrayLog_VM" doc:name="VM" />
+		<flow-ref name="vaGateBankValidationFlow" doc:name="Flow Reference" />
+		<set-property value="VAGetBank" propertyName="type"
+			doc:name="Property" />
+		<vm:outbound-endpoint exchange-pattern="one-way"
+			path="log.response" connector-ref="GrayLog_VM" doc:name="VM" />
 		<exception-strategy ref="sessionException"
 			doc:name="Reference Exception Strategy" />
 	</flow>

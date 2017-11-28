@@ -20,6 +20,11 @@ http://www.hazelcast.com/schema/spring https://hazelcast.com/schema/spring/hazel
 			<hz:map name="RegisterRequestMap" read-backup-data="true"
 				time-to-live-seconds="3600">
 			</hz:map>
+			<hz:map name="CredentialTokenMap" read-backup-data="true"
+				time-to-live-seconds="259200">
+			</hz:map>
+			<hz:map name="GlobalConfigMap" read-backup-data="true">
+			</hz:map>
 		</hz:config>
 	</hz:hazelcast>
 

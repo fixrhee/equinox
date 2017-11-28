@@ -21,13 +21,6 @@ http://www.mulesoft.org/schema/mule/ws http://www.mulesoft.org/schema/mule/ws/cu
 			</and-filter>
 		</message-filter>
 
-		<set-variable
-			value="#[defaultAccountID = (originalPayload['accountID'] == null) ? ${api.default.account.id} : originalPayload['accountID']]"
-			variableName="defaultAccountID" doc:name="Variable" />
-
-		<expression-transformer
-			expression="#[originalPayload['accountID']=flowVars['defaultAccountID'];originalPayload]"
-			doc:name="Expression" />
 
 		<flow-ref name="tokenValidation" />
 		<message-filter onUnaccepted="requestValidationFlow"
@@ -35,17 +28,47 @@ http://www.mulesoft.org/schema/mule/ws http://www.mulesoft.org/schema/mule/ws/cu
 			<expression-filter expression="#[payload == 'ALLOWED']" />
 		</message-filter>
 
+		<set-variable
+			value="#[defaultAccountID = (originalPayload['accountID'] == null) ? originalPayload.globalConfig['default.account.id'] : originalPayload['accountID']]"
+			variableName="defaultAccountID" doc:name="Variable" />
+
+		<expression-transformer
+			expression="#[originalPayload['accountID']=flowVars['defaultAccountID'];originalPayload]"
+			doc:name="Expression" />
+
 		<flow-ref name="accessValidation" />
 		<message-filter onUnaccepted="requestValidationFlow"
 			doc:name="Message">
 			<expression-filter expression="#[payload == 'ALLOWED']" />
 		</message-filter>
 
-		<set-payload value="#[originalPayload]" />
-		<flow-ref name="balanceInqConfigFlow" />
+		<choice>
+			<when expression="#[originalPayload['validateHash'] == true]">
+				<choice>
+					<when
+						expression="#[org.mule.util.StringUtils.isNotEmpty(originalPayload.'requestAuth')]">
+						<flow-ref name="hashValidation" />
+						<message-filter onUnaccepted="requestValidationFlow"
+							doc:name="Message">
+							<expression-filter expression="#[payload == 'ALLOWED']" />
+						</message-filter>
+						<set-payload value="#[originalPayload]" />
+						<flow-ref name="balanceInqConfigFlow" />
+					</when>
+					<otherwise>
+						<flow-ref name="invalidParameterFlow" />
+					</otherwise>
+				</choice>
+			</when>
+			<otherwise>
+				<logger level="DEBUG" message="[SKIP HASH Validation]" />
+				<set-payload value="#[originalPayload]" />
+				<flow-ref name="balanceInqConfigFlow" />
+			</otherwise>
+		</choice>
 	</flow>
 
-	<flow name="confirmPaymentValidationFlow">
+	<flow name="confirmMemberPaymentValidationFlow">
 		<message-filter onUnaccepted="invalidParameterFlow"
 			doc:name="Message">
 			<and-filter doc:name="And">
@@ -61,11 +84,34 @@ http://www.mulesoft.org/schema/mule/ws http://www.mulesoft.org/schema/mule/ws/cu
 			<expression-filter expression="#[payload == 'ALLOWED']" />
 		</message-filter>
 
-		<set-payload value="#[originalPayload]" />
-		<flow-ref name="confirmPaymentConfigFlow" />
+
+		<choice>
+			<when expression="#[originalPayload['validateHash'] == true]">
+				<choice>
+					<when
+						expression="#[org.mule.util.StringUtils.isNotEmpty(originalPayload.'requestAuth')]">
+						<flow-ref name="hashValidation" />
+						<message-filter onUnaccepted="requestValidationFlow"
+							doc:name="Message">
+							<expression-filter expression="#[payload == 'ALLOWED']" />
+						</message-filter>
+						<set-payload value="#[originalPayload]" />
+						<flow-ref name="confirmMemberPaymentConfigFlow" />
+					</when>
+					<otherwise>
+						<flow-ref name="invalidParameterFlow" />
+					</otherwise>
+				</choice>
+			</when>
+			<otherwise>
+				<logger level="DEBUG" message="[SKIP HASH Validation]" />
+				<set-payload value="#[originalPayload]" />
+				<flow-ref name="confirmMemberPaymentConfigFlow" />
+			</otherwise>
+		</choice>
 	</flow>
 
-	<flow name="requestPaymentValidationFlow">
+	<flow name="requestMemberPaymentValidationFlow">
 		<message-filter onUnaccepted="invalidParameterFlow"
 			doc:name="Message">
 			<and-filter doc:name="And">
@@ -74,7 +120,6 @@ http://www.mulesoft.org/schema/mule/ws http://www.mulesoft.org/schema/mule/ws/cu
 				<expression-filter expression="#[originalPayload['toMember'] != null]" />
 				<expression-filter expression="#[originalPayload['amount'] != null]" />
 				<expression-filter expression="#[originalPayload['traceNumber'] != null]" />
-				<expression-filter expression="#[originalPayload['transferTypeID'] != null]" />
 			</and-filter>
 		</message-filter>
 
@@ -85,14 +130,138 @@ http://www.mulesoft.org/schema/mule/ws http://www.mulesoft.org/schema/mule/ws/cu
 			<expression-filter expression="#[payload == 'ALLOWED']" />
 		</message-filter>
 
+		<set-variable
+			value="#[defaultTransferTypeID = originalPayload.globalConfig['default.m2m.trx.id']]"
+			variableName="defaultTransferTypeID" doc:name="Variable" />
+
 		<flow-ref name="accessValidation" />
 		<message-filter onUnaccepted="requestValidationFlow"
 			doc:name="Message">
 			<expression-filter expression="#[payload == 'ALLOWED']" />
 		</message-filter>
 
-		<set-payload value="#[originalPayload]" />
-		<flow-ref name="requestPaymentConfigFlow" />
+		<choice>
+			<when expression="#[originalPayload['validateHash'] == true]">
+				<choice>
+					<when
+						expression="#[org.mule.util.StringUtils.isNotEmpty(originalPayload.'requestAuth')]">
+						<flow-ref name="hashValidation" />
+						<message-filter onUnaccepted="requestValidationFlow"
+							doc:name="Message">
+							<expression-filter expression="#[payload == 'ALLOWED']" />
+						</message-filter>
+						<set-payload value="#[originalPayload]" />
+						<flow-ref name="requestMemberPaymentConfigFlow" />
+					</when>
+					<otherwise>
+						<flow-ref name="invalidParameterFlow" />
+					</otherwise>
+				</choice>
+			</when>
+			<otherwise>
+				<logger level="DEBUG" message="[SKIP HASH Validation]" />
+				<set-payload value="#[originalPayload]" />
+				<flow-ref name="requestMemberPaymentConfigFlow" />
+			</otherwise>
+		</choice>
+	</flow>
+
+	<flow name="requestPartnerPaymentValidationFlow">
+		<message-filter onUnaccepted="invalidParameterFlow"
+			doc:name="Message">
+			<and-filter doc:name="And">
+				<expression-filter expression="#[originalPayload['token'] != null]" />
+				<expression-filter expression="#[originalPayload['fromMember'] != null]" />
+				<expression-filter expression="#[originalPayload['toPartner'] != null]" />
+				<expression-filter expression="#[originalPayload['amount'] != null]" />
+				<expression-filter expression="#[originalPayload['traceNumber'] != null]" />
+			</and-filter>
+		</message-filter>
+
+		<logger level="INFO" message="#[payload]" />
+		<flow-ref name="tokenValidation" />
+		<message-filter onUnaccepted="requestValidationFlow"
+			doc:name="Message">
+			<expression-filter expression="#[payload == 'ALLOWED']" />
+		</message-filter>
+
+		<set-variable
+			value="#[defaultTransferTypeID = originalPayload.globalConfig['default.m2p.payment.trx.id']]"
+			variableName="defaultTransferTypeID" doc:name="Variable" />
+
+		<flow-ref name="accessValidation" />
+		<message-filter onUnaccepted="requestValidationFlow"
+			doc:name="Message">
+			<expression-filter expression="#[payload == 'ALLOWED']" />
+		</message-filter>
+
+		<choice>
+			<when expression="#[originalPayload['validateHash'] == true]">
+				<choice>
+					<when
+						expression="#[org.mule.util.StringUtils.isNotEmpty(originalPayload.'requestAuth')]">
+						<flow-ref name="hashValidation" />
+						<message-filter onUnaccepted="requestValidationFlow"
+							doc:name="Message">
+							<expression-filter expression="#[payload == 'ALLOWED']" />
+						</message-filter>
+						<set-payload value="#[originalPayload]" />
+						<flow-ref name="requestPartnerPaymentConfigFlow" />
+					</when>
+					<otherwise>
+						<flow-ref name="invalidParameterFlow" />
+					</otherwise>
+				</choice>
+			</when>
+			<otherwise>
+				<logger level="DEBUG" message="[SKIP HASH Validation]" />
+				<set-payload value="#[originalPayload]" />
+				<flow-ref name="requestPartnerPaymentConfigFlow" />
+			</otherwise>
+		</choice>
+	</flow>
+
+	<flow name="confirmPartnerPaymentValidationFlow">
+		<message-filter onUnaccepted="invalidParameterFlow"
+			doc:name="Message">
+			<and-filter doc:name="And">
+				<expression-filter expression="#[originalPayload['token'] != null]" />
+				<expression-filter expression="#[originalPayload['requestID'] != null]" />
+				<expression-filter expression="#[originalPayload['otp'] != null]" />
+			</and-filter>
+		</message-filter>
+
+		<flow-ref name="tokenValidation" />
+		<message-filter onUnaccepted="requestValidationFlow"
+			doc:name="Message">
+			<expression-filter expression="#[payload == 'ALLOWED']" />
+		</message-filter>
+
+
+		<choice>
+			<when expression="#[originalPayload['validateHash'] == true]">
+				<choice>
+					<when
+						expression="#[org.mule.util.StringUtils.isNotEmpty(originalPayload.'requestAuth')]">
+						<flow-ref name="hashValidation" />
+						<message-filter onUnaccepted="requestValidationFlow"
+							doc:name="Message">
+							<expression-filter expression="#[payload == 'ALLOWED']" />
+						</message-filter>
+						<set-payload value="#[originalPayload]" />
+						<flow-ref name="confirmPartnerPaymentConfigFlow" />
+					</when>
+					<otherwise>
+						<flow-ref name="invalidParameterFlow" />
+					</otherwise>
+				</choice>
+			</when>
+			<otherwise>
+				<logger level="DEBUG" message="[SKIP HASH Validation]" />
+				<set-payload value="#[originalPayload]" />
+				<flow-ref name="confirmPartnerPaymentConfigFlow" />
+			</otherwise>
+		</choice>
 	</flow>
 
 
@@ -106,7 +275,7 @@ http://www.mulesoft.org/schema/mule/ws http://www.mulesoft.org/schema/mule/ws/cu
 		</message-filter>
 
 		<set-variable
-			value="#[defaultAccountID = (originalPayload['accountID'] == null) ? ${api.default.account.id} : originalPayload['accountID']]"
+			value="#[defaultAccountID = (originalPayload['accountID'] == null) ? originalPayload.globalConfig['default.account.id'] : originalPayload['accountID']]"
 			variableName="defaultAccountID" doc:name="Variable" />
 
 		<expression-transformer
@@ -141,9 +310,185 @@ http://www.mulesoft.org/schema/mule/ws http://www.mulesoft.org/schema/mule/ws/cu
 			<expression-filter expression="#[payload == 'ALLOWED']" />
 		</message-filter>
 
-		<set-payload value="#[originalPayload]" />
-		<flow-ref name="trxHistoryConfigFlow" />
+		<choice>
+			<when expression="#[originalPayload['validateHash'] == true]">
+				<choice>
+					<when
+						expression="#[org.mule.util.StringUtils.isNotEmpty(originalPayload.'requestAuth')]">
+						<flow-ref name="hashValidation" />
+						<message-filter onUnaccepted="requestValidationFlow"
+							doc:name="Message">
+							<expression-filter expression="#[payload == 'ALLOWED']" />
+						</message-filter>
+						<set-payload value="#[originalPayload]" />
+						<flow-ref name="trxHistoryConfigFlow" />
+					</when>
+					<otherwise>
+						<flow-ref name="invalidParameterFlow" />
+					</otherwise>
+				</choice>
+			</when>
+			<otherwise>
+				<logger level="DEBUG" message="[SKIP HASH Validation]" />
+				<set-payload value="#[originalPayload]" />
+				<flow-ref name="trxHistoryConfigFlow" />
+			</otherwise>
+		</choice>
 	</flow>
 
+	<flow name="chargeValidationFlow">
+		<message-filter onUnaccepted="invalidParameterFlow"
+			doc:name="Message">
+			<and-filter doc:name="And">
+				<expression-filter expression="#[originalPayload['token'] != null]" />
+				<expression-filter expression="#[originalPayload['fromMember'] != null]" />
+				<expression-filter expression="#[originalPayload['traceNumber'] != null]" />
+				<expression-filter expression="#[originalPayload['amount'] != null]" />
+			</and-filter>
+		</message-filter>
+
+		<flow-ref name="tokenValidation" />
+		<message-filter onUnaccepted="requestValidationFlow"
+			doc:name="Message">
+			<expression-filter expression="#[payload == 'ALLOWED']" />
+		</message-filter>
+
+		<flow-ref name="accessValidation" />
+		<message-filter onUnaccepted="requestValidationFlow"
+			doc:name="Message">
+			<expression-filter expression="#[payload == 'ALLOWED']" />
+		</message-filter>
+
+		<set-variable
+			value="#[defaultTransferTypeID = (originalPayload['transferTypeID'] == null) ? originalPayload.globalConfig['default.charge.trx.id'] : originalPayload['transferTypeID']]"
+			variableName="defaultTransferTypeID" doc:name="Variable" />
+
+		<set-variable
+			value="#[defaultDescription = (originalPayload['description'] == null) ? 'Charge by ' + originalPayload['parentName'] : originalPayload['description']]"
+			variableName="defaultDescription" doc:name="Variable" />
+
+		<choice>
+			<when expression="#[originalPayload['validateHash'] == true]">
+				<choice>
+					<when
+						expression="#[org.mule.util.StringUtils.isNotEmpty(originalPayload.'requestAuth')]">
+						<flow-ref name="hashValidation" />
+						<message-filter onUnaccepted="requestValidationFlow"
+							doc:name="Message">
+							<expression-filter expression="#[payload == 'ALLOWED']" />
+						</message-filter>
+						<set-payload value="#[originalPayload]" />
+						<flow-ref name="chargeConfigFlow" />
+					</when>
+					<otherwise>
+						<flow-ref name="invalidParameterFlow" />
+					</otherwise>
+				</choice>
+			</when>
+			<otherwise>
+				<logger level="DEBUG" message="[SKIP HASH Validation]" />
+				<set-payload value="#[originalPayload]" />
+				<flow-ref name="chargeConfigFlow" />
+			</otherwise>
+		</choice>
+	</flow>
+
+	<flow name="creditValidationFlow">
+		<message-filter onUnaccepted="invalidParameterFlow"
+			doc:name="Message">
+			<and-filter doc:name="And">
+				<expression-filter expression="#[originalPayload['token'] != null]" />
+				<expression-filter expression="#[originalPayload['toMember'] != null]" />
+				<expression-filter expression="#[originalPayload['traceNumber'] != null]" />
+				<expression-filter expression="#[originalPayload['amount'] != null]" />
+			</and-filter>
+		</message-filter>
+
+		<flow-ref name="tokenValidation" />
+		<message-filter onUnaccepted="requestValidationFlow"
+			doc:name="Message">
+			<expression-filter expression="#[payload == 'ALLOWED']" />
+		</message-filter>
+
+		<set-variable
+			value="#[defaultTransferTypeID = (originalPayload['transferTypeID'] == null) ? originalPayload.globalConfig['default.credit.trx.id'] : originalPayload['transferTypeID']]"
+			variableName="defaultTransferTypeID" doc:name="Variable" />
+
+		<set-variable
+			value="#[defaultDescription = (originalPayload['description'] == null) ? 'Credit by ' + originalPayload['parentName'] : originalPayload['description']]"
+			variableName="defaultDescription" doc:name="Variable" />
+
+		<choice>
+			<when expression="#[originalPayload['validateHash'] == true]">
+				<choice>
+					<when
+						expression="#[org.mule.util.StringUtils.isNotEmpty(originalPayload.'requestAuth')]">
+						<flow-ref name="hashValidation" />
+						<message-filter onUnaccepted="requestValidationFlow"
+							doc:name="Message">
+							<expression-filter expression="#[payload == 'ALLOWED']" />
+						</message-filter>
+						<set-payload value="#[originalPayload]" />
+						<flow-ref name="creditConfigFlow" />
+					</when>
+					<otherwise>
+						<flow-ref name="invalidParameterFlow" />
+					</otherwise>
+				</choice>
+			</when>
+			<otherwise>
+				<logger level="DEBUG" message="[SKIP HASH Validation]" />
+				<set-payload value="#[originalPayload]" />
+				<flow-ref name="creditConfigFlow" />
+			</otherwise>
+		</choice>
+	</flow>
+
+	<flow name="getAccountListValidationFlow">
+		<message-filter onUnaccepted="invalidParameterFlow"
+			doc:name="Message">
+			<and-filter doc:name="And">
+				<expression-filter expression="#[originalPayload['token'] != null]" />
+				<expression-filter expression="#[originalPayload['fromMember'] != null]" />
+			</and-filter>
+		</message-filter>
+
+		<flow-ref name="tokenValidation" />
+		<message-filter onUnaccepted="requestValidationFlow"
+			doc:name="Message">
+			<expression-filter expression="#[payload == 'ALLOWED']" />
+		</message-filter>
+
+		<flow-ref name="accessValidation" />
+		<message-filter onUnaccepted="requestValidationFlow"
+			doc:name="Message">
+			<expression-filter expression="#[payload == 'ALLOWED']" />
+		</message-filter>
+
+		<choice>
+			<when expression="#[originalPayload['validateHash'] == true]">
+				<choice>
+					<when
+						expression="#[org.mule.util.StringUtils.isNotEmpty(originalPayload.'requestAuth')]">
+						<flow-ref name="hashValidation" />
+						<message-filter onUnaccepted="requestValidationFlow"
+							doc:name="Message">
+							<expression-filter expression="#[payload == 'ALLOWED']" />
+						</message-filter>
+						<set-payload value="#[originalPayload]" />
+						<flow-ref name="accountListConfigFlow" />
+					</when>
+					<otherwise>
+						<flow-ref name="invalidParameterFlow" />
+					</otherwise>
+				</choice>
+			</when>
+			<otherwise>
+				<logger level="DEBUG" message="[SKIP HASH Validation]" />
+				<set-payload value="#[originalPayload]" />
+				<flow-ref name="accountListConfigFlow" />
+			</otherwise>
+		</choice>
+	</flow>
 
 </mule>

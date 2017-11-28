@@ -1,19 +1,21 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<mule xmlns:ws="http://www.mulesoft.org/schema/mule/ws" xmlns:json="http://www.mulesoft.org/schema/mule/json"
-	xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:jms="http://www.mulesoft.org/schema/mule/jms"
-	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+<mule xmlns:vm="http://www.mulesoft.org/schema/mule/vm" xmlns:ws="http://www.mulesoft.org/schema/mule/ws"
+	xmlns:json="http://www.mulesoft.org/schema/mule/json" xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns:jms="http://www.mulesoft.org/schema/mule/jms" xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
 	xmlns:spring="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-current.xsd
 http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
 http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
 http://www.mulesoft.org/schema/mule/jms http://www.mulesoft.org/schema/mule/jms/current/mule-jms.xsd
 http://www.mulesoft.org/schema/mule/json http://www.mulesoft.org/schema/mule/json/current/mule-json.xsd
-http://www.mulesoft.org/schema/mule/ws http://www.mulesoft.org/schema/mule/ws/current/mule-ws.xsd">
+http://www.mulesoft.org/schema/mule/ws http://www.mulesoft.org/schema/mule/ws/current/mule-ws.xsd
+http://www.mulesoft.org/schema/mule/vm http://www.mulesoft.org/schema/mule/vm/current/mule-vm.xsd">
 
 	<flow name="balanceInquiryChannelFlow">
 		<http:listener config-ref="HTTP_Listener_Configuration"
-			path="eMoney/BalanceInquiry" allowedMethods="GET" doc:name="HTTP">
+			path="Emoney/BalanceInquiry" allowedMethods="GET" doc:name="HTTP">
 		</http:listener>
 		<message-filter doc:name="Filter favicon">
 			<not-filter>
@@ -35,7 +37,15 @@ http://www.mulesoft.org/schema/mule/ws http://www.mulesoft.org/schema/mule/ws/cu
 		<logger level="INFO"
 			message="[{#[correlationID]} : BALANCE-INQ Request = #[originalPayload]]"
 			doc:name="Logger" />
+		<set-property value="balanceInquiry" propertyName="type"
+			doc:name="Property" />
+		<vm:outbound-endpoint exchange-pattern="one-way"
+			path="log.request" connector-ref="GrayLog_VM" doc:name="VM" />
 		<flow-ref name="balanceInqValidationFlow" doc:name="Flow Reference" />
+		<set-property value="balanceInquiry" propertyName="type"
+			doc:name="Property" />
+		<vm:outbound-endpoint exchange-pattern="one-way"
+			path="log.response" connector-ref="GrayLog_VM" doc:name="VM" />
 		<logger level="INFO"
 			message="[{#[correlationID]} BALANCE-INQ Response = #[payload]]"
 			doc:name="Logger" />
@@ -45,7 +55,7 @@ http://www.mulesoft.org/schema/mule/ws http://www.mulesoft.org/schema/mule/ws/cu
 
 	<flow name="transactionHistoryChannelFlow">
 		<http:listener config-ref="HTTP_Listener_Configuration"
-			path="eMoney/TransactionHistory" allowedMethods="GET" doc:name="HTTP">
+			path="Emoney/TransactionHistory" allowedMethods="GET" doc:name="HTTP">
 		</http:listener>
 		<message-filter doc:name="Filter favicon">
 			<not-filter>
@@ -67,7 +77,15 @@ http://www.mulesoft.org/schema/mule/ws http://www.mulesoft.org/schema/mule/ws/cu
 		<logger level="INFO"
 			message="[{#[correlationID]} : TRX-HISTORY Request = #[originalPayload]]"
 			doc:name="Logger" />
+		<set-property value="transactionHistory" propertyName="type"
+			doc:name="Property" />
+		<vm:outbound-endpoint exchange-pattern="one-way"
+			path="log.request" connector-ref="GrayLog_VM" doc:name="VM" />
 		<flow-ref name="trxHistoryValidationFlow" doc:name="Flow Reference" />
+		<set-property value="transactionHistory" propertyName="type"
+			doc:name="Property" />
+		<vm:outbound-endpoint exchange-pattern="one-way"
+			path="log.response" connector-ref="GrayLog_VM" doc:name="VM" />
 		<logger level="INFO"
 			message="[{#[correlationID]} : TRX-HISTORY Response = #[payload]]"
 			doc:name="Logger" />
@@ -75,9 +93,10 @@ http://www.mulesoft.org/schema/mule/ws http://www.mulesoft.org/schema/mule/ws/cu
 			doc:name="Reference Exception Strategy" />
 	</flow>
 
-	<flow name="requestPaymentChannelFlow">
+	<flow name="requestMemberPaymentChannelFlow">
 		<http:listener config-ref="HTTP_Listener_Configuration"
-			path="eMoney/RequestPayment" allowedMethods="POST" doc:name="HTTP">
+			path="Emoney/Member/RequestMemberPayment" allowedMethods="POST"
+			doc:name="HTTP">
 		</http:listener>
 		<message-filter doc:name="Filter favicon">
 			<not-filter>
@@ -95,18 +114,68 @@ http://www.mulesoft.org/schema/mule/ws http://www.mulesoft.org/schema/mule/ws/cu
 			expression="#[originalPayload['transactionType']=org.apache.commons.lang.StringUtils.substringAfterLast(message.inboundProperties.'http.relative.path', '/');originalPayload]"
 			doc:name="Expression" />
 		<logger level="INFO"
-			message="[{#[correlationID]} : REQUEST-PAYMENT Request = #[originalPayload]]"
+			message="[{#[correlationID]} : REQUEST-PAYMENT-MEMBER Request = #[originalPayload]]"
 			doc:name="Logger" />
-		<flow-ref name="requestPaymentValidationFlow" doc:name="Flow Reference" />
+		<set-property value="requestMemberPayment" propertyName="type"
+			doc:name="Property" />
+		<vm:outbound-endpoint exchange-pattern="one-way"
+			path="log.request" connector-ref="GrayLog_VM" doc:name="VM" />
+		<flow-ref name="requestMemberPaymentValidationFlow" doc:name="Flow Reference" />
+		<set-property value="requestMemberPayment" propertyName="type"
+			doc:name="Property" />
+		<vm:outbound-endpoint exchange-pattern="one-way"
+			path="log.response" connector-ref="GrayLog_VM" doc:name="VM" />
 		<logger level="INFO"
-			message="[{#[correlationID]} : REQUEST-PAYMENT Response = #[payload]]" doc:name="Logger" />
+			message="[{#[correlationID]} : REQUEST-PAYMENT-MEMBER Response = #[payload]]"
+			doc:name="Logger" />
 		<exception-strategy ref="sessionException"
 			doc:name="Reference Exception Strategy" />
 	</flow>
 
-	<flow name="confirmPaymentChannelFlow">
+	<flow name="requestPartnerPaymentChannelFlow">
 		<http:listener config-ref="HTTP_Listener_Configuration"
-			path="eMoney/ConfirmPayment" allowedMethods="POST" doc:name="HTTP">
+			path="Emoney/Member/RequestPartnerPayment" allowedMethods="POST"
+			doc:name="HTTP">
+		</http:listener>
+		<message-filter doc:name="Filter favicon">
+			<not-filter>
+				<wildcard-filter pattern="/favicon.ico"
+					caseSensitive="true" />
+			</not-filter>
+		</message-filter>
+		<set-variable value="#[message.id]" variableName="correlationID"
+			doc:name="Variable" />
+		<custom-transformer class="org.equinox.api.data.MessageTransformer"
+			doc:name="Java" />
+		<set-variable variableName="originalPayload" value="#[payload]"
+			doc:name="Variable" />
+		<expression-transformer
+			expression="#[originalPayload['transactionType']=org.apache.commons.lang.StringUtils.substringAfterLast(message.inboundProperties.'http.relative.path', '/');originalPayload]"
+			doc:name="Expression" />
+		<logger level="INFO"
+			message="[{#[correlationID]} : REQUEST-PAYMENT-PARTNER Request = #[originalPayload]]"
+			doc:name="Logger" />
+		<set-property value="requestPartnerPayment" propertyName="type"
+			doc:name="Property" />
+		<vm:outbound-endpoint exchange-pattern="one-way"
+			path="log.request" connector-ref="GrayLog_VM" doc:name="VM" />
+		<flow-ref name="requestPartnerPaymentValidationFlow"
+			doc:name="Flow Reference" />
+		<set-property value="requestPartnerPayment" propertyName="type"
+			doc:name="Property" />
+		<vm:outbound-endpoint exchange-pattern="one-way"
+			path="log.response" connector-ref="GrayLog_VM" doc:name="VM" />
+		<logger level="INFO"
+			message="[{#[correlationID]} : REQUEST-PAYMENT-PARTNER Response = #[payload]]"
+			doc:name="Logger" />
+		<exception-strategy ref="sessionException"
+			doc:name="Reference Exception Strategy" />
+	</flow>
+
+	<flow name="confirmMemberPaymentChannelFlow">
+		<http:listener config-ref="HTTP_Listener_Configuration"
+			path="Emoney/Member/ConfirmMemberPayment" allowedMethods="POST"
+			doc:name="HTTP">
 		</http:listener>
 		<message-filter doc:name="Filter favicon">
 			<not-filter>
@@ -126,11 +195,176 @@ http://www.mulesoft.org/schema/mule/ws http://www.mulesoft.org/schema/mule/ws/cu
 		<logger level="INFO"
 			message="[{#[correlationID]} : CONFIRM-PAYMENT Request = #[originalPayload]]"
 			doc:name="Logger" />
-		<flow-ref name="confirmPaymentValidationFlow" doc:name="Flow Reference" />
+		<set-property value="confirmPayment" propertyName="type"
+			doc:name="Property" />
+		<vm:outbound-endpoint exchange-pattern="one-way"
+			path="log.request" connector-ref="GrayLog_VM" doc:name="VM" />
+		<flow-ref name="confirmMemberPaymentValidationFlow" doc:name="Flow Reference" />
+		<set-property value="confirmPayment" propertyName="type"
+			doc:name="Property" />
+		<vm:outbound-endpoint exchange-pattern="one-way"
+			path="log.response" connector-ref="GrayLog_VM" doc:name="VM" />
 		<logger level="INFO"
-			message="[{#[correlationID]} : CONFIRM-PAYMENT Response = #[payload]]" doc:name="Logger" />
+			message="[{#[correlationID]} : CONFIRM-PAYMENT Response = #[payload]]"
+			doc:name="Logger" />
 		<exception-strategy ref="sessionException"
 			doc:name="Reference Exception Strategy" />
 	</flow>
+
+	<flow name="confirmPartnerPaymentChannelFlow">
+		<http:listener config-ref="HTTP_Listener_Configuration"
+			path="Emoney/Member/ConfirmPartnerPayment" allowedMethods="POST"
+			doc:name="HTTP">
+		</http:listener>
+		<message-filter doc:name="Filter favicon">
+			<not-filter>
+				<wildcard-filter pattern="/favicon.ico"
+					caseSensitive="true" />
+			</not-filter>
+		</message-filter>
+		<set-variable value="#[message.id]" variableName="correlationID"
+			doc:name="Variable" />
+		<custom-transformer class="org.equinox.api.data.MessageTransformer"
+			doc:name="Java" />
+		<set-variable variableName="originalPayload" value="#[payload]"
+			doc:name="Variable" />
+		<expression-transformer
+			expression="#[originalPayload['transactionType']=org.apache.commons.lang.StringUtils.substringAfterLast(message.inboundProperties.'http.relative.path', '/');originalPayload]"
+			doc:name="Expression" />
+		<logger level="INFO"
+			message="[{#[correlationID]} : CONFIRM-PAYMENT-PARTNER Request = #[originalPayload]]"
+			doc:name="Logger" />
+		<set-property value="confirmPartnerPayment" propertyName="type"
+			doc:name="Property" />
+		<vm:outbound-endpoint exchange-pattern="one-way"
+			path="log.request" connector-ref="GrayLog_VM" doc:name="VM" />
+		<flow-ref name="confirmPartnerPaymentValidationFlow"
+			doc:name="Flow Reference" />
+		<set-property value="confirmPartnerPayment" propertyName="type"
+			doc:name="Property" />
+		<vm:outbound-endpoint exchange-pattern="one-way"
+			path="log.response" connector-ref="GrayLog_VM" doc:name="VM" />
+		<logger level="INFO"
+			message="[{#[correlationID]} : CONFIRM-PAYMENT-PARTNER Response = #[payload]]"
+			doc:name="Logger" />
+		<exception-strategy ref="sessionException"
+			doc:name="Reference Exception Strategy" />
+	</flow>
+
+	<flow name="chargePaymentChannelFlow">
+		<http:listener config-ref="HTTP_Listener_Configuration"
+			path="Emoney/Partner/Charge" allowedMethods="POST" doc:name="HTTP">
+		</http:listener>
+		<message-filter doc:name="Filter favicon">
+			<not-filter>
+				<wildcard-filter pattern="/favicon.ico"
+					caseSensitive="true" />
+			</not-filter>
+		</message-filter>
+		<set-variable value="#[message.id]" variableName="correlationID"
+			doc:name="Variable" />
+		<custom-transformer class="org.equinox.api.data.MessageTransformer"
+			doc:name="Java" />
+		<set-variable variableName="originalPayload" value="#[payload]"
+			doc:name="Variable" />
+		<expression-transformer
+			expression="#[originalPayload['transactionType']=org.apache.commons.lang.StringUtils.substringAfterLast(message.inboundProperties.'http.relative.path', '/');originalPayload]"
+			doc:name="Expression" />
+		<logger level="INFO"
+			message="[{#[correlationID]} : CHARGE Request = #[originalPayload]]"
+			doc:name="Logger" />
+		<set-property value="charge" propertyName="type"
+			doc:name="Property" />
+		<vm:outbound-endpoint exchange-pattern="one-way"
+			path="log.request" connector-ref="GrayLog_VM" doc:name="VM" />
+		<flow-ref name="chargeValidationFlow" doc:name="Flow Reference" />
+		<set-property value="charge" propertyName="type"
+			doc:name="Property" />
+		<vm:outbound-endpoint exchange-pattern="one-way"
+			path="log.response" connector-ref="GrayLog_VM" doc:name="VM" />
+		<logger level="INFO"
+			message="[{#[correlationID]} : CHARGE Response = #[payload]]"
+			doc:name="Logger" />
+		<exception-strategy ref="sessionException"
+			doc:name="Reference Exception Strategy" />
+	</flow>
+
+	<flow name="creditPaymentChannelFlow">
+		<http:listener config-ref="HTTP_Listener_Configuration"
+			path="Emoney/Partner/Credit" allowedMethods="POST" doc:name="HTTP">
+		</http:listener>
+		<message-filter doc:name="Filter favicon">
+			<not-filter>
+				<wildcard-filter pattern="/favicon.ico"
+					caseSensitive="true" />
+			</not-filter>
+		</message-filter>
+		<set-variable value="#[message.id]" variableName="correlationID"
+			doc:name="Variable" />
+		<custom-transformer class="org.equinox.api.data.MessageTransformer"
+			doc:name="Java" />
+		<set-variable variableName="originalPayload" value="#[payload]"
+			doc:name="Variable" />
+		<expression-transformer
+			expression="#[originalPayload['transactionType']=org.apache.commons.lang.StringUtils.substringAfterLast(message.inboundProperties.'http.relative.path', '/');originalPayload]"
+			doc:name="Expression" />
+		<logger level="INFO"
+			message="[{#[correlationID]} : CREDIT Request = #[originalPayload]]"
+			doc:name="Logger" />
+		<set-property value="credit" propertyName="type"
+			doc:name="Property" />
+		<vm:outbound-endpoint exchange-pattern="one-way"
+			path="log.request" connector-ref="GrayLog_VM" doc:name="VM" />
+		<flow-ref name="creditValidationFlow" doc:name="Flow Reference" />
+		<set-property value="credit" propertyName="type"
+			doc:name="Property" />
+		<vm:outbound-endpoint exchange-pattern="one-way"
+			path="log.response" connector-ref="GrayLog_VM" doc:name="VM" />
+		<logger level="INFO"
+			message="[{#[correlationID]} : CREDIT Response = #[payload]]"
+			doc:name="Logger" />
+		<exception-strategy ref="sessionException"
+			doc:name="Reference Exception Strategy" />
+	</flow>
+
+	<flow name="getAccountListFlow">
+		<http:listener config-ref="HTTP_Listener_Configuration"
+			path="Emoney/Accounts" allowedMethods="GET" doc:name="HTTP">
+		</http:listener>
+		<message-filter doc:name="Filter favicon">
+			<not-filter>
+				<wildcard-filter pattern="/favicon.ico"
+					caseSensitive="true" />
+			</not-filter>
+		</message-filter>
+		<set-variable value="#[message.id]" variableName="correlationID"
+			doc:name="Variable" />
+		<custom-transformer class="org.equinox.api.data.MessageTransformer"
+			doc:name="Java" />
+		<set-variable variableName="originalPayload" value="#[payload]"
+			doc:name="Variable" />
+		<expression-transformer
+			expression="#[originalPayload['transactionType']=org.apache.commons.lang.StringUtils.substringAfterLast(message.inboundProperties.'http.relative.path', '/');originalPayload]"
+			doc:name="Expression" />
+		<logger level="INFO"
+			message="[{#[correlationID]} : GET-ACCOUNT Request = #[originalPayload]]"
+			doc:name="Logger" />
+		<set-payload value="#[originalPayload]" />
+		<set-property value="getAccountList" propertyName="type"
+			doc:name="Property" />
+		<vm:outbound-endpoint exchange-pattern="one-way"
+			path="log.request" connector-ref="GrayLog_VM" doc:name="VM" />
+		<flow-ref name="getAccountListValidationFlow" doc:name="Flow Reference" />
+		<set-property value="getAccountList" propertyName="type"
+			doc:name="Property" />
+		<vm:outbound-endpoint exchange-pattern="one-way"
+			path="log.response" connector-ref="GrayLog_VM" doc:name="VM" />
+		<logger level="INFO"
+			message="[{#[correlationID]} : GET-ACCOUNT Response = #[payload]]"
+			doc:name="Logger" />
+		<exception-strategy ref="sessionException"
+			doc:name="Reference Exception Strategy" />
+	</flow>
+
 
 </mule>
