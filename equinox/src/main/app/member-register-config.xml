@@ -118,7 +118,7 @@ http://www.mulesoft.org/schema/mule/vm http://www.mulesoft.org/schema/mule/vm/cu
 					   </soapenv:Header>
 					   <soapenv:Body>
 					      <ser:createCredential>
-					         <accessTypeID>' + originalPayload.globalConfig['member.default.pin.access.type.id'] + '</accessTypeID>
+					         <accessTypeID>' + globalConfig['member.default.pin.access.type.id'] + '</accessTypeID>
 					         <credential>' + flowVars['generatedPIN'] + '</credential>
 					         <username>' + flowVars['username'] + '</username>
 					      </ser:createCredential>

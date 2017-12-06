@@ -29,7 +29,7 @@ http://www.mulesoft.org/schema/mule/ws http://www.mulesoft.org/schema/mule/ws/cu
 		</message-filter>
 
 		<set-variable
-			value="#[defaultAccountID = (originalPayload['accountID'] == null) ? originalPayload.globalConfig['default.account.id'] : originalPayload['accountID']]"
+			value="#[defaultAccountID = (originalPayload['accountID'] == null) ? globalConfig['default.account.id'] : originalPayload['accountID']]"
 			variableName="defaultAccountID" doc:name="Variable" />
 
 		<expression-transformer
@@ -131,7 +131,7 @@ http://www.mulesoft.org/schema/mule/ws http://www.mulesoft.org/schema/mule/ws/cu
 		</message-filter>
 
 		<set-variable
-			value="#[defaultTransferTypeID = originalPayload.globalConfig['default.m2m.trx.id']]"
+			value="#[defaultTransferTypeID = globalConfig['default.m2m.trx.id']]"
 			variableName="defaultTransferTypeID" doc:name="Variable" />
 
 		<flow-ref name="accessValidation" />
@@ -186,7 +186,7 @@ http://www.mulesoft.org/schema/mule/ws http://www.mulesoft.org/schema/mule/ws/cu
 		</message-filter>
 
 		<set-variable
-			value="#[defaultTransferTypeID = originalPayload.globalConfig['default.m2p.payment.trx.id']]"
+			value="#[defaultTransferTypeID = globalConfig['default.m2p.payment.trx.id']]"
 			variableName="defaultTransferTypeID" doc:name="Variable" />
 
 		<flow-ref name="accessValidation" />
@@ -274,8 +274,20 @@ http://www.mulesoft.org/schema/mule/ws http://www.mulesoft.org/schema/mule/ws/cu
 			</and-filter>
 		</message-filter>
 
+		<flow-ref name="tokenValidation" />
+		<message-filter onUnaccepted="requestValidationFlow"
+			doc:name="Message">
+			<expression-filter expression="#[payload == 'ALLOWED']" />
+		</message-filter>
+
+		<flow-ref name="accessValidation" />
+		<message-filter onUnaccepted="requestValidationFlow"
+			doc:name="Message">
+			<expression-filter expression="#[payload == 'ALLOWED']" />
+		</message-filter>
+
 		<set-variable
-			value="#[defaultAccountID = (originalPayload['accountID'] == null) ? originalPayload.globalConfig['default.account.id'] : originalPayload['accountID']]"
+			value="#[defaultAccountID = (originalPayload['accountID'] == null) ? globalConfig['default.account.id'] : originalPayload['accountID']]"
 			variableName="defaultAccountID" doc:name="Variable" />
 
 		<expression-transformer
@@ -297,19 +309,7 @@ http://www.mulesoft.org/schema/mule/ws http://www.mulesoft.org/schema/mule/ws/cu
 		<expression-transformer
 			expression="#[originalPayload['pageSize']=flowVars['defaultPageSize'];originalPayload]"
 			doc:name="Expression" />
-
-		<flow-ref name="tokenValidation" />
-		<message-filter onUnaccepted="requestValidationFlow"
-			doc:name="Message">
-			<expression-filter expression="#[payload == 'ALLOWED']" />
-		</message-filter>
-
-		<flow-ref name="accessValidation" />
-		<message-filter onUnaccepted="requestValidationFlow"
-			doc:name="Message">
-			<expression-filter expression="#[payload == 'ALLOWED']" />
-		</message-filter>
-
+			
 		<choice>
 			<when expression="#[originalPayload['validateHash'] == true]">
 				<choice>
@@ -360,7 +360,7 @@ http://www.mulesoft.org/schema/mule/ws http://www.mulesoft.org/schema/mule/ws/cu
 		</message-filter>
 
 		<set-variable
-			value="#[defaultTransferTypeID = (originalPayload['transferTypeID'] == null) ? originalPayload.globalConfig['default.charge.trx.id'] : originalPayload['transferTypeID']]"
+			value="#[defaultTransferTypeID = (originalPayload['transferTypeID'] == null) ? globalConfig['default.charge.trx.id'] : originalPayload['transferTypeID']]"
 			variableName="defaultTransferTypeID" doc:name="Variable" />
 
 		<set-variable
@@ -411,7 +411,7 @@ http://www.mulesoft.org/schema/mule/ws http://www.mulesoft.org/schema/mule/ws/cu
 		</message-filter>
 
 		<set-variable
-			value="#[defaultTransferTypeID = (originalPayload['transferTypeID'] == null) ? originalPayload.globalConfig['default.credit.trx.id'] : originalPayload['transferTypeID']]"
+			value="#[defaultTransferTypeID = (originalPayload['transferTypeID'] == null) ? globalConfig['default.credit.trx.id'] : originalPayload['transferTypeID']]"
 			variableName="defaultTransferTypeID" doc:name="Variable" />
 
 		<set-variable

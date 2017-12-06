@@ -48,7 +48,7 @@ http://www.mulesoft.org/schema/mule/jms http://www.mulesoft.org/schema/mule/jms/
 			variableName="groupID" doc:name="Variable" />
 		<choice doc:name="Choice">
 			<when expression="#[flowVars['status'] == 'PROCESSED']">
-				<set-variable variableName="globalPayload" value="#[new java.util.HashMap()]"
+				<set-variable variableName="globalConfig" value="#[new java.util.HashMap()]"
 					doc:name="Variable" />
 				<expression-component doc:name="Expression">
 					<![CDATA[
@@ -95,40 +95,32 @@ http://www.mulesoft.org/schema/mule/jms http://www.mulesoft.org/schema/mule/jms/
 								value="#[xpath3('//globalConfig' + [counter] + '/value')]"
 								doc:name="Variable" />
 							<expression-transformer
-								expression="#[globalPayload[tempHeader]=tempValue;globalPayload]"
+								expression="#[globalConfig[tempHeader]=tempValue;globalConfig]"
 								doc:name="Expression" />
 						</foreach>
-						<expression-transformer
-							expression="#[originalPayload['globalConfig']=globalPayload;originalPayload]"
-							doc:name="Expression" />
 						<expression-component doc:name="Expression">
 							<![CDATA[
 							regMap = new java.util.HashMap();
 							regMap['methodType']= 'PUT';			
 							regMap['name']= 'GlobalConfigMap';
 							regMap['key']= 'global';
-							regMap['value']= globalPayload;
+							regMap['value']= globalConfig;
 							payload = regMap;]]>
 						</expression-component>
 						<pooled-component>
 							<spring-object bean="CacheProcessor" />
 						</pooled-component>
-						<expression-transformer
-							expression="#[originalPayload['globalConfig']=globalPayload;originalPayload]"
-							doc:name="Expression" />
 					</when>
 					<otherwise>
-						<expression-transformer
-							expression="#[originalPayload['globalConfig']=payload;originalPayload]"
-							doc:name="Expression" />
+						<set-variable variableName="globalConfig" value="#[payload]"
+							doc:name="Variable" />
 						<logger level="INFO" message="[USING Cached Global Config]" />
 					</otherwise>
 				</choice>
 				<set-variable
-					value="#[originalPayload.globalConfig['partner.secret.auth.access.type.id']]"
+					value="#[globalConfig['partner.secret.auth.access.type.id']]"
 					variableName="accessTypeID" doc:name="Variable" />
-				<set-variable
-					value="#[originalPayload.globalConfig['api.allowed.group.id']]"
+				<set-variable value="#[globalConfig['api.allowed.group.id']]"
 					variableName="listAllowedGroupID" doc:name="Variable" />
 				<expression-component doc:name="Expression">
 					<![CDATA[
@@ -275,7 +267,7 @@ http://www.mulesoft.org/schema/mule/jms http://www.mulesoft.org/schema/mule/jms/
 				<expression-transformer
 					expression="#[originalPayload['parentUsername']=flowVars['parentUsername'];originalPayload]"
 					doc:name="Expression" />
-				<set-variable variableName="globalPayload" value="#[new java.util.HashMap()]"
+				<set-variable variableName="globalConfig" value="#[new java.util.HashMap()]"
 					doc:name="Variable" />
 				<expression-component doc:name="Expression">
 					<![CDATA[
@@ -322,37 +314,30 @@ http://www.mulesoft.org/schema/mule/jms http://www.mulesoft.org/schema/mule/jms/
 								value="#[xpath3('//globalConfig' + [counter] + '/value')]"
 								doc:name="Variable" />
 							<expression-transformer
-								expression="#[globalPayload[tempHeader]=tempValue;globalPayload]"
+								expression="#[globalConfig[tempHeader]=tempValue;globalConfig]"
 								doc:name="Expression" />
 						</foreach>
-						<expression-transformer
-							expression="#[originalPayload['globalConfig']=globalPayload;originalPayload]"
-							doc:name="Expression" />
 						<expression-component doc:name="Expression">
 							<![CDATA[
 							regMap = new java.util.HashMap();
 							regMap['methodType']= 'PUT';			
 							regMap['name']= 'GlobalConfigMap';
 							regMap['key']= 'global';
-							regMap['value']= globalPayload;
+							regMap['value']= globalConfig;
 							payload = regMap;]]>
 						</expression-component>
 						<pooled-component>
 							<spring-object bean="CacheProcessor" />
 						</pooled-component>
-						<expression-transformer
-							expression="#[originalPayload['globalConfig']=globalPayload;originalPayload]"
-							doc:name="Expression" />
 					</when>
 					<otherwise>
-						<expression-transformer
-							expression="#[originalPayload['globalConfig']=payload;originalPayload]"
-							doc:name="Expression" />
+						<set-variable variableName="globalConfig" value="#[payload]"
+							doc:name="Variable" />
 						<logger level="INFO" message="[USING Cached Global Config]" />
 					</otherwise>
 				</choice>
 				<set-variable
-					value="#[originalPayload.globalConfig['partner.secret.auth.access.type.id']]"
+					value="#[globalConfig['partner.secret.auth.access.type.id']]"
 					variableName="secretAuthID" doc:name="Variable" />
 				<expression-component doc:name="Expression">
 					<![CDATA[

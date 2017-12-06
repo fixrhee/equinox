@@ -1,13 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<mule xmlns:udp="http://www.mulesoft.org/schema/mule/udp"
-	xmlns:tls="http://www.mulesoft.org/schema/mule/tls" xmlns:https="http://www.mulesoft.org/schema/mule/https"
-	xmlns:tcp="http://www.mulesoft.org/schema/mule/tcp" xmlns:vm="http://www.mulesoft.org/schema/mule/vm"
-	xmlns:ws="http://www.mulesoft.org/schema/mule/ws" xmlns:json="http://www.mulesoft.org/schema/mule/json"
-	xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:jms="http://www.mulesoft.org/schema/mule/jms"
-	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+<mule xmlns:file="http://www.mulesoft.org/schema/mule/file"
+	xmlns:udp="http://www.mulesoft.org/schema/mule/udp" xmlns:tls="http://www.mulesoft.org/schema/mule/tls"
+	xmlns:https="http://www.mulesoft.org/schema/mule/https" xmlns:tcp="http://www.mulesoft.org/schema/mule/tcp"
+	xmlns:vm="http://www.mulesoft.org/schema/mule/vm" xmlns:ws="http://www.mulesoft.org/schema/mule/ws"
+	xmlns:json="http://www.mulesoft.org/schema/mule/json" xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns:jms="http://www.mulesoft.org/schema/mule/jms" xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
 	xmlns:spring="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://www.mulesoft.org/schema/mule/https http://www.mulesoft.org/schema/mule/https/current/mule-https.xsd
+	xsi:schemaLocation="
+http://www.mulesoft.org/schema/mule/file http://www.mulesoft.org/schema/mule/file/current/mule-file.xsd http://www.mulesoft.org/schema/mule/https http://www.mulesoft.org/schema/mule/https/current/mule-https.xsd
 http://www.mulesoft.org/schema/mule/tcp http://www.mulesoft.org/schema/mule/tcp/current/mule-tcp.xsd
 http://www.mulesoft.org/schema/mule/json http://www.mulesoft.org/schema/mule/json/current/mule-json.xsd
 http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-current.xsd
@@ -55,9 +57,14 @@ http://www.mulesoft.org/schema/mule/udp http://www.mulesoft.org/schema/mule/udp/
 	<vm:connector name="GrayLog_VM" validateConnections="true"
 		doc:name="VM" />
 
+	<vm:connector name="File_VM" validateConnections="true"
+		doc:name="VM" />
+
 	<udp:connector name="GrayLogUDP" validateConnections="true"
 		keepSendSocketOpen="true" doc:name="UDP" />
 
+	<file:connector name="File" outputPattern="#[flowVars.fileName]"
+		doc:name="File" />
 
 	<spring:beans>
 		<spring:bean id="Bean" name="NonNullMapper"

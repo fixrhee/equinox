@@ -17,16 +17,9 @@ http://www.mulesoft.org/schema/mule/ws http://www.mulesoft.org/schema/mule/ws/cu
 		<catch-exception-strategy
 			when="#[exception.causedBy(com.auth0.jwt.exceptions.InvalidClaimException)]"
 			doc:name="Catch Exception Strategy">
-			<expression-component doc:name="Expression">
-				<![CDATA[
-				responseMap = new java.util.HashMap();
-				responseMap['exception'] = exception.cause.?message or exception.cause;
-				responseMap['originalPayload'] = originalPayload;
-				responseMap['response'] = org.equinox.api.data.StatusBuilder.getStatus('SESSION_EXPIRED');
-				payload = responseMap;]]>
-			</expression-component>
-			<json:object-to-json-transformer
-				doc:name="Object to JSON" mapper-ref="NonNullMapper" />
+			<set-payload value="#[originalPayload]" />
+			<set-property value="#[flowVars['correlationID']]"
+				propertyName="messageID" doc:name="Property" />
 			<vm:outbound-endpoint exchange-pattern="one-way"
 				path="log.exception" connector-ref="GrayLog_VM" doc:name="VM" />
 			<expression-component doc:name="Expression">
@@ -43,16 +36,9 @@ http://www.mulesoft.org/schema/mule/ws http://www.mulesoft.org/schema/mule/ws/cu
 		<catch-exception-strategy
 			when="#[exception.causedBy(com.auth0.jwt.exceptions.SignatureVerificationException)]"
 			doc:name="Catch Exception Strategy">
-			<expression-component doc:name="Expression">
-				<![CDATA[
-				responseMap = new java.util.HashMap();
-				responseMap['exception'] = exception.cause.?message or exception.cause;
-				responseMap['originalPayload'] = originalPayload;
-				responseMap['response'] = org.equinox.api.data.StatusBuilder.getStatus('INVALID_SIGNATURE');
-				payload = responseMap;]]>
-			</expression-component>
-			<json:object-to-json-transformer
-				doc:name="Object to JSON" mapper-ref="NonNullMapper" />
+			<set-payload value="#[originalPayload]" />
+			<set-property value="#[flowVars['correlationID']]"
+				propertyName="messageID" doc:name="Property" />
 			<vm:outbound-endpoint exchange-pattern="one-way"
 				path="log.exception" connector-ref="GrayLog_VM" doc:name="VM" />
 			<expression-component doc:name="Expression">
@@ -69,16 +55,9 @@ http://www.mulesoft.org/schema/mule/ws http://www.mulesoft.org/schema/mule/ws/cu
 		<catch-exception-strategy
 			when="#[exception.causedBy(com.auth0.jwt.exceptions.JWTDecodeException)]"
 			doc:name="Catch Exception Strategy">
-			<expression-component doc:name="Expression">
-				<![CDATA[
-				responseMap = new java.util.HashMap();
-				responseMap['exception'] = exception.cause.?message or exception.cause;
-				responseMap['originalPayload'] = originalPayload;
-				responseMap['response'] = org.equinox.api.data.StatusBuilder.getStatus('INVALID_SIGNATURE');
-				payload = responseMap;]]>
-			</expression-component>
-			<json:object-to-json-transformer
-				doc:name="Object to JSON" mapper-ref="NonNullMapper" />
+			<set-payload value="#[originalPayload]" />
+			<set-property value="#[flowVars['correlationID']]"
+				propertyName="messageID" doc:name="Property" />
 			<vm:outbound-endpoint exchange-pattern="one-way"
 				path="log.exception" connector-ref="GrayLog_VM" doc:name="VM" />
 			<expression-component doc:name="Expression">
@@ -94,16 +73,9 @@ http://www.mulesoft.org/schema/mule/ws http://www.mulesoft.org/schema/mule/ws/cu
 		</catch-exception-strategy>
 		<catch-exception-strategy
 			when="#[exception.causedBy(java.net.ConnectException)]" doc:name="Catch Exception Strategy">
-			<expression-component doc:name="Expression">
-				<![CDATA[
-				responseMap = new java.util.HashMap();
-				responseMap['exception'] = exception.cause.?message or exception.cause;
-				responseMap['originalPayload'] = originalPayload;
-				responseMap['response'] = org.equinox.api.data.StatusBuilder.getStatus('HOST_CONNECTION_TIMEOUT');
-				payload = responseMap;]]>
-			</expression-component>
-			<json:object-to-json-transformer
-				doc:name="Object to JSON" mapper-ref="NonNullMapper" />
+			<set-payload value="#[originalPayload]" />
+			<set-property value="#[flowVars['correlationID']]"
+				propertyName="messageID" doc:name="Property" />
 			<vm:outbound-endpoint exchange-pattern="one-way"
 				path="log.exception" connector-ref="GrayLog_VM" doc:name="VM" />
 			<expression-component doc:name="Expression">
@@ -119,16 +91,9 @@ http://www.mulesoft.org/schema/mule/ws http://www.mulesoft.org/schema/mule/ws/cu
 		</catch-exception-strategy>
 		<catch-exception-strategy
 			when="#[exception.causedBy(java.net.SocketException)]" doc:name="Catch Exception Strategy">
-			<expression-component doc:name="Expression">
-				<![CDATA[
-				responseMap = new java.util.HashMap();
-				responseMap['exception'] = exception.cause.?message or exception.cause;
-				responseMap['originalPayload'] = originalPayload;
-				responseMap['response'] = org.equinox.api.data.StatusBuilder.getStatus('HOST_CONNECTION_FAILED');
-				payload = responseMap;]]>
-			</expression-component>
-			<json:object-to-json-transformer
-				doc:name="Object to JSON" mapper-ref="NonNullMapper" />
+			<set-payload value="#[originalPayload]" />
+			<set-property value="#[flowVars['correlationID']]"
+				propertyName="messageID" doc:name="Property" />
 			<vm:outbound-endpoint exchange-pattern="one-way"
 				path="log.exception" connector-ref="GrayLog_VM" doc:name="VM" />
 			<expression-component doc:name="Expression">
@@ -145,16 +110,9 @@ http://www.mulesoft.org/schema/mule/ws http://www.mulesoft.org/schema/mule/ws/cu
 		<catch-exception-strategy
 			when="#[exception.causedBy(org.mule.module.http.internal.request.ResponseValidatorException)]"
 			doc:name="Catch Exception Strategy">
-			<expression-component doc:name="Expression">
-				<![CDATA[
-				responseMap = new java.util.HashMap();
-				responseMap['exception'] = exception.cause.?message or exception.cause;
-				responseMap['originalPayload'] = originalPayload;
-				responseMap['response'] = org.equinox.api.data.StatusBuilder.getStatus('UNDEFINED_ERROR');
-				payload = responseMap;]]>
-			</expression-component>
-			<json:object-to-json-transformer
-				doc:name="Object to JSON" mapper-ref="NonNullMapper" />
+			<set-payload value="#[originalPayload]" />
+			<set-property value="#[flowVars['correlationID']]"
+				propertyName="messageID" doc:name="Property" />
 			<vm:outbound-endpoint exchange-pattern="one-way"
 				path="log.exception" connector-ref="GrayLog_VM" doc:name="VM" />
 			<expression-component doc:name="Expression">

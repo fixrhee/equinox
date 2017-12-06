@@ -19,7 +19,9 @@ public class MessageTransformer extends AbstractMessageTransformer {
 			requestPayload.putAll(queryParam);
 			StringBuffer sb = new StringBuffer();
 			for (Map.Entry<String, Object> entry : requestPayload.entrySet()) {
-				sb.append("/" + entry.getKey() + "=" + entry.getValue());
+				if (entry.getValue() instanceof String) {
+					sb.append("/" + entry.getKey() + "=" + entry.getValue());
+				}
 			}
 			requestPayload.put("requestAuth", message.getInboundProperty("requestauth"));
 			requestPayload.put("requestAuthContent", sb.toString());
@@ -30,7 +32,9 @@ public class MessageTransformer extends AbstractMessageTransformer {
 			requestPayload.putAll(message.getPayload(Map.class));
 			StringBuffer sb = new StringBuffer();
 			for (Map.Entry<String, Object> entry : requestPayload.entrySet()) {
-				sb.append("/" + entry.getKey() + "=" + entry.getValue());
+				if (entry.getValue() instanceof String) {
+					sb.append("/" + entry.getKey() + "=" + entry.getValue());
+				}
 			}
 			requestPayload.put("requestAuth", message.getInboundProperty("requestauth"));
 			requestPayload.put("requestAuthContent", sb.toString());

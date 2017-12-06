@@ -71,7 +71,7 @@ http://www.mulesoft.org/schema/mule/ws http://www.mulesoft.org/schema/mule/ws/cu
 		</message-filter>
 
 		<set-variable
-			value="#[BankID = (originalPayload['bankId'] == null) ? originalPayload.globalConfig['api.va.default.bank.id'] : originalPayload['bankId']]"
+			value="#[BankID = (originalPayload['bankId'] == null) ? globalConfig['api.va.default.bank.id'] : originalPayload['bankId']]"
 			variableName="BankID" doc:name="Variable" />
 		<expression-transformer
 			expression="#[originalPayload['bankID']=flowVars['BankID'];originalPayload]"
@@ -85,7 +85,7 @@ http://www.mulesoft.org/schema/mule/ws http://www.mulesoft.org/schema/mule/ws/cu
 			doc:name="Expression" />
 
 		<set-variable
-			value="#[ExpireAt = (originalPayload['expiredAtMinute'] == null) ? originalPayload.globalConfig['api.va.default.expired.minute'] : originalPayload['expiredAtMinute']]"
+			value="#[ExpireAt = (originalPayload['expiredAtMinute'] == null) ? globalConfig['api.va.default.expired.minute'] : originalPayload['expiredAtMinute']]"
 			variableName="ExpireAt" doc:name="Variable" />
 		<expression-transformer
 			expression="#[originalPayload['expiredAtMinute']=flowVars['ExpireAt'];originalPayload]"

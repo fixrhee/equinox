@@ -46,7 +46,7 @@ http://www.mulesoft.org/schema/mule/vm http://www.mulesoft.org/schema/mule/vm/cu
 			regMap['from']= 'noreply@optima.co.id';
 			regMap['to']= payload['email'];
 			regMap['subject']= 'ACCOUNT REGISTRATION';
-			regMap['body']= 'Thank you, your account has been created. This is your transaction PIN : ' + payload.generatedPIN ;
+			regMap['body']= 'Thank you, \r\n your account has been created. This is your transaction PIN : ' + payload.generatedPIN ;
 			payload = regMap;]]>
 		</expression-component>
 		<jms:outbound-endpoint connector-ref="Active_MQ"
@@ -65,7 +65,7 @@ http://www.mulesoft.org/schema/mule/vm http://www.mulesoft.org/schema/mule/vm/cu
 			regMap['from']= 'noreply@optima.co.id';
 			regMap['to']= payload['email'];
 			regMap['subject']= 'PARTNER REGISTRATION';
-			regMap['body']= 'Thank you for registering, here is your user info : Username : ' + payload['username'] + ', APIKEY : ' + payload['APIKey'] + ', Secret Key : ' + payload['secretAuth'] + ', PIN : ' + payload['credential'];
+			regMap['body']= 'Thank you for registering, here is your user info :\r\n\r\nUsername    : ' + payload['username'] + '\r\nAPIKEY      : ' + payload['APIKey'] + '\r\nSecret Key  : ' + payload['secretAuth'] + '\r\nPIN         : ' + payload['credential'];
 			payload = regMap;]]>
 		</expression-component>
 		<jms:outbound-endpoint connector-ref="Active_MQ"
