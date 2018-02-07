@@ -30,7 +30,7 @@ http://www.mulesoft.org/schema/mule/ws http://www.mulesoft.org/schema/mule/ws/cu
 				         <toMember>' + originalPayload['toMember'] + '</toMember>
 				         <traceNumber>' + originalPayload['traceNumber'] + '</traceNumber>
 				         <originator>' + originalPayload['parentUsername'] + '</originator>
-				         <transferTypeID>' + flowVars['#[defaultTransferTypeID'] + '</transferTypeID>
+				         <transferTypeID>' + flowVars['defaultTransferTypeID'] + '</transferTypeID>
 				      </ser:requestPaymentConfirmation>
 				   </soapenv:Body>
 				</soapenv:Envelope>';

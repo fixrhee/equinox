@@ -214,6 +214,9 @@ http://www.mulesoft.org/schema/mule/ws http://www.mulesoft.org/schema/mule/ws/cu
 			<expression-filter expression="#[payload == 'ALLOWED']" />
 		</message-filter>
 
+				<flow-ref name="memberKYCConfigFlow" />
+		
+<!-- 
 		<choice>
 			<when expression="#[originalPayload['validateHash'] == true]">
 				<choice>
@@ -238,6 +241,7 @@ http://www.mulesoft.org/schema/mule/ws http://www.mulesoft.org/schema/mule/ws/cu
 				<flow-ref name="memberKYCConfigFlow" />
 			</otherwise>
 		</choice>
+		-->
 	</flow>
 
 </mule>

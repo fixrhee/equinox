@@ -35,7 +35,7 @@ http://www.mulesoft.org/schema/mule/jms http://www.mulesoft.org/schema/mule/jms/
 				         <amount>' + originalPayload['amount'] + '</amount>
 				         <bankID>' + originalPayload['bankID'] + '</bankID>
 				         <callbackURL>' + originalPayload['callbackUrl'] + '</callbackURL>
-				         <expiredAtMinute>' + originalPayload['expiredAtMinute'] + '</expiredAtMinute>
+				         <expiredDateTime>' + flowVars['expiredDateTime'] + '</expiredDateTime>
 				         <fullPayment>' + originalPayload['fullPayment'] + '</fullPayment>
 				         <minimumPayment>' + originalPayload['minimumPayment'] + '</minimumPayment>
 				         <name>' + originalPayload['name'] + '</name>
@@ -97,7 +97,7 @@ http://www.mulesoft.org/schema/mule/jms http://www.mulesoft.org/schema/mule/jms/
 					responseList = [responseMap];
 					
 					vaMap = new java.util.HashMap();
-					vaMap['VirtualAccountResponse']= responseList;	
+					vaMap['PaymentCollectionResponse']= responseList;	
 					vaMap['status'] = org.equinox.api.data.StatusBuilder.getStatus('PROCESSED');
 					payload = vaMap;]]>
 				</expression-component>

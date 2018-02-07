@@ -45,15 +45,31 @@ http://www.mulesoft.org/schema/mule/jms http://www.mulesoft.org/schema/mule/jms/
 			<http:request-builder>
 				<http:header headerName="soapaction" value="&quot;deleteVA&quot;" />
 			</http:request-builder>
+			<http:success-status-code-validator
+				values="200,500" />
 		</http:request>
 		<byte-array-to-string-transformer
 			doc:name="Byte Array to String" />
-		<expression-component doc:name="Expression">
+		<set-variable value="#[xpath3('//faultstring')]"
+			variableName="faultstring" doc:name="Variable" />
+		<choice doc:name="Choice">
+			<when expression="#[faultstring == null]">
+				<expression-component doc:name="Expression">
 			<![CDATA[
 				respMap = new java.util.HashMap();
 				respMap['status']= org.equinox.api.data.StatusBuilder.getStatus('PROCESSED');			
 				payload = respMap;]]>
-		</expression-component>
+				</expression-component>
+			</when>
+			<otherwise>
+				<expression-component doc:name="Expression">
+			<![CDATA[
+				respMap = new java.util.HashMap();
+				respMap['status']= org.equinox.api.data.StatusBuilder.getStatus(faultstring);			
+				payload = respMap;]]>
+				</expression-component>
+			</otherwise>
+		</choice>
 		<flow-ref name="responseHandlerFlow" doc:name="Flow Reference" />
 	</flow>
 

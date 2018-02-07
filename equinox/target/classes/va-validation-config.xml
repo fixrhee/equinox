@@ -19,7 +19,7 @@ http://www.mulesoft.org/schema/mule/ws http://www.mulesoft.org/schema/mule/ws/cu
 				<expression-filter expression="#[originalPayload['paymentCode'] != null]" />
 			</and-filter>
 		</message-filter>
-		
+
 		<flow-ref name="tokenValidation" />
 		<message-filter onUnaccepted="requestValidationFlow"
 			doc:name="Message">
@@ -85,10 +85,15 @@ http://www.mulesoft.org/schema/mule/ws http://www.mulesoft.org/schema/mule/ws/cu
 			doc:name="Expression" />
 
 		<set-variable
-			value="#[ExpireAt = (originalPayload['expiredAtMinute'] == null) ? globalConfig['api.va.default.expired.minute'] : originalPayload['expiredAtMinute']]"
+			value="#[ExpireAt = (originalPayload['expiredAtHour'] == null) ? globalConfig['api.va.default.expired.hour'] : originalPayload['expiredAtHour']]"
 			variableName="ExpireAt" doc:name="Variable" />
+
+		<set-variable
+			value="#[org.equinox.api.process.Utils.addHourToDate(ExpireAt)]"
+			variableName="expiredDateTime" doc:name="Variable" />
+
 		<expression-transformer
-			expression="#[originalPayload['expiredAtMinute']=flowVars['ExpireAt'];originalPayload]"
+			expression="#[originalPayload['expiredDateTime']=flowVars['expiredDateTime'];originalPayload]"
 			doc:name="Expression" />
 
 		<set-variable

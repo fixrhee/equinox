@@ -131,7 +131,7 @@ http://www.mulesoft.org/schema/mule/ws http://www.mulesoft.org/schema/mule/ws/cu
 		</message-filter>
 
 		<set-variable
-			value="#[defaultTransferTypeID = globalConfig['default.m2m.trx.id']]"
+			value="defaultTransferTypeID = (originalPayload['transferTypeID'] == null) ? globalConfig['default.m2m.payment.trx.id'] : originalPayload['transferTypeID']]"
 			variableName="defaultTransferTypeID" doc:name="Variable" />
 
 		<flow-ref name="accessValidation" />
@@ -186,7 +186,7 @@ http://www.mulesoft.org/schema/mule/ws http://www.mulesoft.org/schema/mule/ws/cu
 		</message-filter>
 
 		<set-variable
-			value="#[defaultTransferTypeID = globalConfig['default.m2p.payment.trx.id']]"
+			value="defaultTransferTypeID = (originalPayload['transferTypeID'] == null) ? globalConfig['default.m2p.payment.trx.id'] : originalPayload['transferTypeID']]"
 			variableName="defaultTransferTypeID" doc:name="Variable" />
 
 		<flow-ref name="accessValidation" />
@@ -309,7 +309,23 @@ http://www.mulesoft.org/schema/mule/ws http://www.mulesoft.org/schema/mule/ws/cu
 		<expression-transformer
 			expression="#[originalPayload['pageSize']=flowVars['defaultPageSize'];originalPayload]"
 			doc:name="Expression" />
-			
+
+		<set-variable
+			value="#[fromDate = (originalPayload['fromDate'] == null) ? org.equinox.api.process.Utils.GetDate('yyyy-MM-dd') : originalPayload['fromDate']]"
+			variableName="fromDate" doc:name="Variable" />
+
+		<expression-transformer
+			expression="#[originalPayload['fromDate']=flowVars['fromDate'];originalPayload]"
+			doc:name="Expression" />
+
+		<set-variable
+			value="#[toDate = (originalPayload['toDate'] == null) ? org.equinox.api.process.Utils.GetDate('yyyy-MM-dd') : originalPayload['toDate']]"
+			variableName="toDate" doc:name="Variable" />
+
+		<expression-transformer
+			expression="#[originalPayload['toDate']=flowVars['toDate'];originalPayload]"
+			doc:name="Expression" />
+
 		<choice>
 			<when expression="#[originalPayload['validateHash'] == true]">
 				<choice>

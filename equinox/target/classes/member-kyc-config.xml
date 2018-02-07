@@ -31,11 +31,12 @@ http://www.mulesoft.org/schema/mule/vm http://www.mulesoft.org/schema/mule/vm/cu
 					   </soapenv:Header>
 					   <soapenv:Body>
 					      <ser:membersKYCRequest>
-					         <groupID>1</groupID>
+					         <groupID>' + globalConfig['member.default.registered.group.id'] + '</groupID>
 					         <imagePath1>/opt/image/' + originalPayload['fromMember'] + '/' + originalPayload.file1['fileName'] + '.' + originalPayload.file1['fileExtension'] + '</imagePath1>
 					         <imagePath2>/opt/image/' + originalPayload['fromMember'] + '/' + originalPayload.file2['fileName'] + '.' + originalPayload.file2['fileExtension'] + '</imagePath2>
 					         <username>' + originalPayload['fromMember'] + '</username>
-					      </ser:membersKYCRequest>
+					         <idCardNo>' + originalPayload['idCardNo'] + '</idCardNo>
+       			      </ser:membersKYCRequest>
 					   </soapenv:Body>
 					</soapenv:Envelope>';
 				payload = msg;]]>

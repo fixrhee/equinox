@@ -70,10 +70,13 @@ http://www.mulesoft.org/schema/mule/jms http://www.mulesoft.org/schema/mule/jms/
 					variableName="persistent" doc:name="Variable" />
 				<set-variable value="#[xpath3('//paymentCode')]"
 					variableName="paymentCode" doc:name="Variable" />
+				<set-variable value="#[xpath3('//referenceNumber')]"
+					variableName="referenceNumber" doc:name="Variable" />
 				<expression-component doc:name="Expression">
 					<![CDATA[				
 					detailMap = new java.util.HashMap();
 					detailMap['paymentCode'] = flowVars['paymentCode'];
+					detailMap['referenceNumber'] = flowVars['referenceNumber'];
 					detailMap['name'] = flowVars['name'];
 					detailMap['amount']= flowVars['amount'];
 					detailMap['persistent']= flowVars['persistent'];
@@ -94,7 +97,7 @@ http://www.mulesoft.org/schema/mule/jms http://www.mulesoft.org/schema/mule/jms/
 					responseList = [responseMap];
 					
 					vaMap = new java.util.HashMap();
-					vaMap['VirtualAccountResponse']= responseList;	
+					vaMap['PaymentCollectionResponse']= responseList;	
 					vaMap['status'] = org.equinox.api.data.StatusBuilder.getStatus('PROCESSED');
 					payload = vaMap;]]>
 				</expression-component>

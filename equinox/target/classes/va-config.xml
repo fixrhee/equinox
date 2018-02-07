@@ -25,7 +25,7 @@ http://www.mulesoft.org/schema/mule/vm http://www.mulesoft.org/schema/mule/vm/cu
 
 	<flow name="vaGetRequestFlow">
 		<http:listener config-ref="HTTP_Listener_Configuration"
-			path="VirtualAccount" allowedMethods="GET,POST" doc:name="HTTP" />
+			path="PaymentCollection/Billing" allowedMethods="GET,POST" doc:name="HTTP" />
 		<message-filter doc:name="Filter favicon">
 			<not-filter>
 				<wildcard-filter pattern="/favicon.ico"
@@ -90,7 +90,7 @@ http://www.mulesoft.org/schema/mule/vm http://www.mulesoft.org/schema/mule/vm/cu
 
 	<flow name="vaUpdateDeleteFlow">
 		<http:listener config-ref="HTTP_Listener_Configuration"
-			path="VirtualAccount/*" allowedMethods="PUT,DELETE" doc:name="HTTP" />
+			path="PaymentCollection/Billing/*" allowedMethods="PUT,DELETE" doc:name="HTTP" />
 		<message-filter doc:name="Filter favicon">
 			<not-filter>
 				<wildcard-filter pattern="/favicon.ico"
@@ -158,7 +158,7 @@ http://www.mulesoft.org/schema/mule/vm http://www.mulesoft.org/schema/mule/vm/cu
 
 	<flow name="vaGetListBankFlow">
 		<http:listener config-ref="HTTP_Listener_Configuration"
-			path="VirtualAccount/GetBankID" allowedMethods="GET" doc:name="HTTP" />
+			path="PaymentCollection/GetBankID" allowedMethods="GET" doc:name="HTTP" />
 		<message-filter doc:name="Filter favicon">
 			<not-filter>
 				<wildcard-filter pattern="/favicon.ico"

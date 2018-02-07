@@ -103,7 +103,7 @@ http://www.mulesoft.org/schema/mule/vm http://www.mulesoft.org/schema/mule/vm/cu
 
 	<flow name="requestMemberPaymentChannelFlow">
 		<http:listener config-ref="HTTP_Listener_Configuration"
-			path="Emoney/Member/RequestMemberPayment" allowedMethods="POST"
+			path="Emoney/RequestMemberPayment" allowedMethods="POST"
 			doc:name="HTTP">
 		</http:listener>
 		<message-filter doc:name="Filter favicon">
@@ -146,7 +146,7 @@ http://www.mulesoft.org/schema/mule/vm http://www.mulesoft.org/schema/mule/vm/cu
 
 	<flow name="requestPartnerPaymentChannelFlow">
 		<http:listener config-ref="HTTP_Listener_Configuration"
-			path="Emoney/Member/RequestPartnerPayment" allowedMethods="POST"
+			path="Emoney/RequestPartnerPayment" allowedMethods="POST"
 			doc:name="HTTP">
 		</http:listener>
 		<message-filter doc:name="Filter favicon">
@@ -190,7 +190,7 @@ http://www.mulesoft.org/schema/mule/vm http://www.mulesoft.org/schema/mule/vm/cu
 
 	<flow name="confirmMemberPaymentChannelFlow">
 		<http:listener config-ref="HTTP_Listener_Configuration"
-			path="Emoney/Member/ConfirmMemberPayment" allowedMethods="POST"
+			path="Emoney/ConfirmMemberPayment" allowedMethods="POST"
 			doc:name="HTTP">
 		</http:listener>
 		<message-filter doc:name="Filter favicon">
@@ -233,7 +233,7 @@ http://www.mulesoft.org/schema/mule/vm http://www.mulesoft.org/schema/mule/vm/cu
 
 	<flow name="confirmPartnerPaymentChannelFlow">
 		<http:listener config-ref="HTTP_Listener_Configuration"
-			path="Emoney/Member/ConfirmPartnerPayment" allowedMethods="POST"
+			path="Emoney/ConfirmPartnerPayment" allowedMethods="POST"
 			doc:name="HTTP">
 		</http:listener>
 		<message-filter doc:name="Filter favicon">
@@ -277,7 +277,7 @@ http://www.mulesoft.org/schema/mule/vm http://www.mulesoft.org/schema/mule/vm/cu
 
 	<flow name="chargePaymentChannelFlow">
 		<http:listener config-ref="HTTP_Listener_Configuration"
-			path="Emoney/Partner/Charge" allowedMethods="POST" doc:name="HTTP">
+			path="Emoney/Charge" allowedMethods="POST" doc:name="HTTP">
 		</http:listener>
 		<message-filter doc:name="Filter favicon">
 			<not-filter>
@@ -319,7 +319,7 @@ http://www.mulesoft.org/schema/mule/vm http://www.mulesoft.org/schema/mule/vm/cu
 
 	<flow name="creditPaymentChannelFlow">
 		<http:listener config-ref="HTTP_Listener_Configuration"
-			path="Emoney/Partner/Credit" allowedMethods="POST" doc:name="HTTP">
+			path="Emoney/Credit" allowedMethods="POST" doc:name="HTTP">
 		</http:listener>
 		<message-filter doc:name="Filter favicon">
 			<not-filter>

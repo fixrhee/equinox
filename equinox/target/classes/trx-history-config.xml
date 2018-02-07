@@ -27,6 +27,8 @@ http://www.mulesoft.org/schema/mule/ws http://www.mulesoft.org/schema/mule/ws/cu
 			         <accountID>' + originalPayload['accountID'] + '</accountID>
 			         <currentPage>' + originalPayload['currentPage'] + '</currentPage>
 			         <pageSize>' + originalPayload['pageSize'] + '</pageSize>
+			         <fromDate>' + originalPayload['fromDate'] + '</fromDate>
+			         <toDate>' + originalPayload['toDate'] + '</toDate>
 			         <username>' + originalPayload['fromMember'] + '</username>
 			      </ser:loadTransactionHistory>
 			   </soapenv:Body>

@@ -22,12 +22,6 @@
                   </org.mule.common.metadata.MetaDataProperties>
                 </entry>
                 <entry>
-                  <org.mule.common.metadata.MetaDataPropertyScope>INBOUND</org.mule.common.metadata.MetaDataPropertyScope>
-                  <org.mule.common.metadata.MetaDataProperties>
-                    <fields/>
-                  </org.mule.common.metadata.MetaDataProperties>
-                </entry>
-                <entry>
                   <org.mule.common.metadata.MetaDataPropertyScope>OUTBOUND</org.mule.common.metadata.MetaDataPropertyScope>
                   <org.mule.common.metadata.MetaDataProperties>
                     <fields>
@@ -202,6 +196,12 @@
                   </org.mule.common.metadata.MetaDataProperties>
                 </entry>
                 <entry>
+                  <org.mule.common.metadata.MetaDataPropertyScope>INBOUND</org.mule.common.metadata.MetaDataPropertyScope>
+                  <org.mule.common.metadata.MetaDataProperties>
+                    <fields/>
+                  </org.mule.common.metadata.MetaDataProperties>
+                </entry>
+                <entry>
                   <org.mule.common.metadata.MetaDataPropertyScope>SESSION</org.mule.common.metadata.MetaDataPropertyScope>
                   <org.mule.common.metadata.MetaDataProperties>
                     <fields/>
@@ -224,6 +224,12 @@
               <properties>
                 <entry>
                   <org.mule.common.metadata.MetaDataPropertyScope>RECORD</org.mule.common.metadata.MetaDataPropertyScope>
+                  <org.mule.common.metadata.MetaDataProperties>
+                    <fields/>
+                  </org.mule.common.metadata.MetaDataProperties>
+                </entry>
+                <entry>
+                  <org.mule.common.metadata.MetaDataPropertyScope>OUTBOUND</org.mule.common.metadata.MetaDataPropertyScope>
                   <org.mule.common.metadata.MetaDataProperties>
                     <fields/>
                   </org.mule.common.metadata.MetaDataProperties>
@@ -255,7 +261,7 @@
                                 <metaDataModelPropertiesManager>
                                   <properties>
                                     <org.mule.common.metadata.property.xml.SchemaTypeMetaDataProperty>
-                                      <typeQName reference="../../../../../../../../../../../../../../input/properties/entry[3]/org.mule.common.metadata.MetaDataProperties/fields/org.mule.common.metadata.DefaultMetaDataField/model/fields/org.mule.common.metadata.DefaultMetaDataField/model/metaDataModelPropertiesManager/properties/org.mule.common.metadata.property.xml.SchemaTypeMetaDataProperty/typeQName"/>
+                                      <typeQName reference="../../../../../../../../../../../../../../input/properties/entry[2]/org.mule.common.metadata.MetaDataProperties/fields/org.mule.common.metadata.DefaultMetaDataField/model/fields/org.mule.common.metadata.DefaultMetaDataField/model/metaDataModelPropertiesManager/properties/org.mule.common.metadata.property.xml.SchemaTypeMetaDataProperty/typeQName"/>
                                     </org.mule.common.metadata.property.xml.SchemaTypeMetaDataProperty>
                                   </properties>
                                 </metaDataModelPropertiesManager>
@@ -280,8 +286,8 @@
                             <prefix>ns0</prefix>
                           </rootElement>
                           <schemas class="org.mule.common.metadata.StringBasedSchemaProvider">
-                            <schemas reference="../../../../../../../../../input/properties/entry[3]/org.mule.common.metadata.MetaDataProperties/fields/org.mule.common.metadata.DefaultMetaDataField/model/schemas/schemas"/>
-                            <encoding reference="../../../../../../../../../input/properties/entry[3]/org.mule.common.metadata.MetaDataProperties/fields/org.mule.common.metadata.DefaultMetaDataField/model/schemas/encoding"/>
+                            <schemas reference="../../../../../../../../../input/properties/entry[2]/org.mule.common.metadata.MetaDataProperties/fields/org.mule.common.metadata.DefaultMetaDataField/model/schemas/schemas"/>
+                            <encoding reference="../../../../../../../../../input/properties/entry[2]/org.mule.common.metadata.MetaDataProperties/fields/org.mule.common.metadata.DefaultMetaDataField/model/schemas/encoding"/>
                           </schemas>
                           <namespaceManager>
                             <namespacePrefix>
@@ -298,12 +304,6 @@
                         </metaDataFieldPropertyManager>
                       </org.mule.common.metadata.DefaultMetaDataField>
                     </fields>
-                  </org.mule.common.metadata.MetaDataProperties>
-                </entry>
-                <entry>
-                  <org.mule.common.metadata.MetaDataPropertyScope>OUTBOUND</org.mule.common.metadata.MetaDataPropertyScope>
-                  <org.mule.common.metadata.MetaDataProperties>
-                    <fields/>
                   </org.mule.common.metadata.MetaDataProperties>
                 </entry>
                 <entry>

@@ -5,6 +5,9 @@ import java.security.MessageDigest;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.text.SimpleDateFormat;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.Date;
 import java.util.Locale;
 import java.util.Random;
@@ -79,6 +82,11 @@ public abstract class Utils {
 
 	public static String formatDate(Date date) {
 		return DateFormatUtils.format(date, "yyyy-MM-dd HH:mm:SS");
+	}
+
+	public static String addHourToDate(Integer hourAdd) {
+		LocalDateTime nextTime = LocalDateTime.now().plusHours(hourAdd);
+		return nextTime.toString();
 	}
 
 }
